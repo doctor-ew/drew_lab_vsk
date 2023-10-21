@@ -12,8 +12,7 @@
         initApp(canvasElement); // Initialize the app after the component is mounted
     });
 </script>
-
-<canvas bind:this={canvasElement} id="c" class="fixed flex-grow min-h-0 min-w-0 h-screen" width="1416" height="1091"></canvas>
+<canvas bind:this={canvasElement} id="c" class="fixed top-0 left-0 flex-grow min-h-0 min-w-0 h-screen w-screen" width="1416" height="1091"></canvas>
 
 <main id="main"
       class="main relative flex-grow container mx-auto justify-center max-w-screen-lg space-y-10 bg-white bg-opacity-50 w-full">

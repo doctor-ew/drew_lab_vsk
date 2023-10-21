@@ -95,7 +95,7 @@ button:focus-visible {
     }
 
     #welcome {
-        background: url(https://www.doctorew.com/shuttlebay/axis_of_awesome.svg);
+        background: url(https://www.doctorew.com/shuttlebay/axis_of_awesome.svg) no-repeat;
     }
 
     #doctorew_contact {
