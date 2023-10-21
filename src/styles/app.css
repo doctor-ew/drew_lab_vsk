@@ -69,7 +69,7 @@ button:focus-visible {
     outline: 4px auto -webkit-focus-ring-color;
 }
 
-@media (prefers-color-scheme: light) {
+@media (prefers-color-scheme: dark) {
     :root {
         color: #213547;
         background-color: #ffffff;
@@ -95,11 +95,12 @@ button:focus-visible {
     }
 
     #welcome {
-        background: url(https://www.doctorew.com/shuttlebay/axis_of_awesome.svg);
+        background: url(https://www.doctorew.com/shuttlebay/axis_of_awesome.svg) no-repeat;
     }
 
     #doctorew_contact {
-        background: url(../assets/doctor-doctor-doctor-1024.png) no-repeat center center;
+        background: url(../../public/doctor-doctor-doctor-1024.png) no-repeat center center;
+        background-color: lime;
     }
 
 
