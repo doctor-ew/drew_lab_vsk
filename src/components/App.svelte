@@ -5,11 +5,16 @@
     import anime from 'animejs';
     import { onMount } from 'svelte';
     import { initApp } from '../scripts/appScript.ts'; // Import the function from the new script file
+    import { relay_message } from '../scripts/chat.ts'; // Adjust the path accordingly
+
+
 
     let canvasElement; // Declare the canvas variable
 
     onMount(() => {
         initApp(canvasElement); // Initialize the app after the component is mounted
+        relay_message();
+
     });
 </script>
 <canvas bind:this={canvasElement} id="c" class="fixed top-0 left-0 flex-grow min-h-0 min-w-0 h-screen w-screen" width="1416" height="1091"></canvas>
@@ -58,8 +63,8 @@
             bg-white pl-40 font-bold text-5xl">
             Chat with Skippy the Magnificent! <br><sub class="text-lg">(From <a
                 href="https://www.craigalanson.com/books" target="_blank" rel="noopener noreferrer"
-                class="animate-pulse">Craig Alanson's ExForce series</a>) using OpenAI's GPT-3 model \\ <a
-                href="https://github.com/doctor-ew/skippy-the-magnificent-python" target="_blank"
+                class="animate-pulse">Craig Alanson's ExForce series</a>) using golang, gin, and OpenAI's GPT-4 model \\ <a
+                href="https://github.com/doctor-ew/go_skippy_lc" target="_blank"
                 rel="noopener noreferrer" class="animate-pulse hover:animate-bounce">repo</a> </sub>
         </h1>
         <div class="chat_holder grid grid-cols-1 gap-4 flex">
