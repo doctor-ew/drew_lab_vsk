@@ -21,8 +21,18 @@ export const load = () => {
 
         const message_response = await fetch(uri_to_fetch, settings);
         if (!message_response.ok) {
-            throw new Error(`HTTP error! status: ${message_response.status}`);
+            let errMsg = `HTTP error! status: ${message_response.status}`;
+            try {
+                const errorData = await message_response.json();
+                if (errorData && errorData.error) {
+                    errMsg += ` Message: ${errorData.error}`;
+                }
+            } catch (e) {
+                // Failed to parse error message from server, use default error message
+            }
+            throw new Error(errMsg);
         }
+
         return await message_response.json();
     };
 

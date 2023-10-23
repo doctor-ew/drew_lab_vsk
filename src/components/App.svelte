@@ -63,8 +63,8 @@
             bg-white pl-40 font-bold text-5xl">
             Chat with Skippy the Magnificent! <br><sub class="text-lg">(From <a
                 href="https://www.craigalanson.com/books" target="_blank" rel="noopener noreferrer"
-                class="animate-pulse">Craig Alanson's ExForce series</a>) using OpenAI's GPT-3 model \\ <a
-                href="https://github.com/doctor-ew/skippy-the-magnificent-python" target="_blank"
+                class="animate-pulse">Craig Alanson's ExForce series</a>) using golang, gin, and OpenAI's GPT-4 model \\ <a
+                href="https://github.com/doctor-ew/go_skippy_lc" target="_blank"
                 rel="noopener noreferrer" class="animate-pulse hover:animate-bounce">repo</a> </sub>
         </h1>
         <div class="chat_holder grid grid-cols-1 gap-4 flex">
