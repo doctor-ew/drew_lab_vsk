@@ -5,11 +5,16 @@
     import anime from 'animejs';
     import { onMount } from 'svelte';
     import { initApp } from '../scripts/appScript.ts'; // Import the function from the new script file
+    import { relay_message } from '../scripts/chat.ts'; // Adjust the path accordingly
+
+
 
     let canvasElement; // Declare the canvas variable
 
     onMount(() => {
         initApp(canvasElement); // Initialize the app after the component is mounted
+        relay_message();
+
     });
 </script>
 <canvas bind:this={canvasElement} id="c" class="fixed top-0 left-0 flex-grow min-h-0 min-w-0 h-screen w-screen" width="1416" height="1091"></canvas>
