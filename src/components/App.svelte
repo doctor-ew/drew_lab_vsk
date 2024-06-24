@@ -7,22 +7,35 @@
     import { initApp } from '../scripts/appScript.ts';
     import { relay_message } from '../scripts/chat.ts';
     import { fetchFoxtrotCode } from '../scripts/foxtrot.ts';
-
+  import { programmingLanguages } from '../scripts/programmingLanguages.ts';
     let canvasElement;
     let foxtrotCode = "";
     let programmingLanguage = "";
 
-    onMount(() => {
-        initApp(canvasElement);
-        relay_message();
+  onMount(() => {
+    initApp(canvasElement);
+    relay_message();
+    refreshFoxtrotCode();
+  });
 
-        fetchFoxtrotCode().then(result => {
-            programmingLanguage = result.language;
-            foxtrotCode = result.code;
-        }).catch(error => {
-            console.error("Error fetching Foxtrot code:", error);
-        });
-    });
+  async function refreshFoxtrotCode(language = "") {
+    try {
+      const result = await fetchFoxtrotCode(language);
+      programmingLanguage = result.language;
+      foxtrotCode = result.code;
+    } catch (error) {
+      console.error("Error fetching Foxtrot code:", error);
+    }
+  }
+
+  function handleLanguageChange(event) {
+    const selectedLanguage = event.target.value;
+    refreshFoxtrotCode(selectedLanguage);
+  }
+
+  function handleRandomButtonClick() {
+    refreshFoxtrotCode();
+  }
 </script>
 <canvas bind:this={canvasElement} id="c" class="fixed top-0 left-0 flex-grow min-h-0 min-w-0 h-screen w-screen" width="1416" height="1091"></canvas>
 
@@ -75,7 +88,7 @@
                 rel="noopener noreferrer" class="animate-pulse hover:animate-bounce">repo</a> </sub>
         </h1>
         <div class="chat_holder grid grid-cols-1 gap-4 flex">
-            <div class="form_holder block">
+            <div class="form_holder block mb-6">
                 <form class="mx-auto p-6">
                     <!-- <div class='input text '> -->
                     <label for="chat_box" class="active"></label>
@@ -89,9 +102,21 @@
         </div>
     </section>
     <section id="foxtrot-codex" class="items-center w-full m-0">
+        <div class="cb_top_holder bg-white block">
         <h1 id="skippistan" class="mx-auto flex-auto p-10 m-0 bg-no-repeat bg-white pl-40 font-bold text-3xl">
             Write `I will not use ChatGPT to code` 500 times in {programmingLanguage}!
         </h1>
+       
+    <div class="form_holder block">
+      <label for="language_selector">Select Language:</label>
+      <select id="language_selector" on:change={handleLanguageChange}>
+        {#each programmingLanguages as language}
+        <option value={language}>{language}</option>
+        {/each}
+      </select>
+      <button on:click={handleRandomButtonClick}>Random</button>
+    </div>
+     </div>
         <div class="chalkboard grid grid-cols-1 gap-4 flex">
             <pre class="code-output">{foxtrotCode}</pre>
         </div>
@@ -123,7 +148,7 @@
     background-size: contain; /* Ensure the image fits within the container */
     position: relative; /* Ensure positioned elements are relative to this container */
     padding-bottom: 0; /* Remove any additional padding */
-    min-height: 500px; /* Ensure there is enough space for the chalkboard */
+    min-height: 550px; /* Ensure there is enough space for the chalkboard */
 }
 
 .code-output {
@@ -136,6 +161,7 @@
     font-family: 'Source Code Pro', monospace;
     overflow: auto;
     position: absolute; /* Position the code output within the parent */
+    text-align: left;
     
     bottom: 50px; /* Align the code output to the bottom of the chalkboard */
     /* left: 50%; */ /* Center the code output horizontally */
