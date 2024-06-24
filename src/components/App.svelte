@@ -7,10 +7,12 @@
     import { initApp } from '../scripts/appScript.ts';
     import { relay_message } from '../scripts/chat.ts';
     import { fetchFoxtrotCode } from '../scripts/foxtrot.ts';
-  import { programmingLanguages } from '../scripts/programmingLanguages.ts';
+    import { programmingLanguages } from '../scripts/programmingLanguages.ts';
+
     let canvasElement;
     let foxtrotCode = "";
     let programmingLanguage = "";
+
 
   onMount(() => {
     initApp(canvasElement);
@@ -25,8 +27,9 @@
       foxtrotCode = result.code;
     } catch (error) {
       console.error("Error fetching Foxtrot code:", error);
+            foxtrotCode = `{programmingLanguage} fried Skippy's circuits`;
+        }
     }
-  }
 
   function handleLanguageChange(event) {
     const selectedLanguage = event.target.value;
@@ -166,9 +169,92 @@
     bottom: 50px; /* Align the code output to the bottom of the chalkboard */
     /* left: 50%; */ /* Center the code output horizontally */
     /* transform: translateX(-50%); */ /* Center the code output horizontally */
-    max-height: calc(100% - 4rem); /* Ensure the code output fits within the container */
-    min-height: 275px; /* Minimum height to ensure enough space for the code */
+    /*max-height: calc(100% - 4rem);*/ /* Ensure the code output fits within the container */
+    height: 275px; /* Minimum height to ensure enough space for the code */
     white-space: break-spaces; /* Allow the code to break at spaces */
 }
 
+    @media (max-width: 1024px) {
+        #welcome {
+            font-size: 3.5rem;
+            padding-left: 20px;
+        }
+
+        #doctorew_contact, #skippistan {
+            padding-left: 20px;
+        }
+
+        .cb_top_holder {
+            padding: 0 20px;
+        }
+
+        .code-output {
+            padding: 1rem;
+            max-width: calc(100% - 40px);
+        }
+
+        #foxtrot-codex {
+            background-size: cover;
+            min-height: 450px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        #welcome {
+            font-size: 2.5rem;
+            padding-left: 10px;
+        }
+
+        #doctorew_contact, #skippistan {
+            padding-left: 10px;
+        }
+
+        .cb_top_holder {
+            padding: 0 10px;
+        }
+
+        .code-output {
+            padding: 0.5rem;
+            max-width: calc(100% - 20px);
+        }
+
+        #foxtrot-codex {
+            background-size: cover;
+            min-height: 400px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        #welcome {
+            font-size: 2rem;
+            padding-left: 5px;
+        }
+
+        #doctorew_contact, #skippistan {
+            padding-left: 5px;
+        }
+
+        .cb_top_holder {
+            padding: 0 5px;
+        }
+
+        .code-output {
+            padding: 0.5rem;
+            max-width: calc(100% - 10px);
+        }
+
+        #foxtrot-codex {
+            background-size: cover;
+            min-height: 350px;
+        }
+
+        .form_holder {
+            flex-direction: column;
+        }
+
+        .form_holder label, .form_holder select, .form_holder button {
+            margin-bottom: 10px;
+            width: 100%;
+        }
+    }
 </style>
