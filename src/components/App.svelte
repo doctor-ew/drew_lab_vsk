@@ -1,20 +1,27 @@
 <script lang="ts">
-    import svelteLogo from '../../public/svelte.svg'
-    import viteLogo from '/vite.svg'
-    import Counter from '../lib/Counter.svelte'
+    import svelteLogo from '../../public/svelte.svg';
+    import viteLogo from '/vite.svg';
+    import Counter from '../lib/Counter.svelte';
     import anime from 'animejs';
     import { onMount } from 'svelte';
-    import { initApp } from '../scripts/appScript.ts'; // Import the function from the new script file
-    import { relay_message } from '../scripts/chat.ts'; // Adjust the path accordingly
+    import { initApp } from '../scripts/appScript.ts';
+    import { relay_message } from '../scripts/chat.ts';
+    import { fetchFoxtrotCode } from '../scripts/foxtrot.ts';
 
-
-
-    let canvasElement; // Declare the canvas variable
+    let canvasElement;
+    let foxtrotCode = "";
+    let programmingLanguage = "";
 
     onMount(() => {
-        initApp(canvasElement); // Initialize the app after the component is mounted
+        initApp(canvasElement);
         relay_message();
 
+        fetchFoxtrotCode().then(result => {
+            programmingLanguage = result.language;
+            foxtrotCode = result.code;
+        }).catch(error => {
+            console.error("Error fetching Foxtrot code:", error);
+        });
     });
 </script>
 <canvas bind:this={canvasElement} id="c" class="fixed top-0 left-0 flex-grow min-h-0 min-w-0 h-screen w-screen" width="1416" height="1091"></canvas>
@@ -60,8 +67,8 @@
     </section>
     <section id="chat" class="items-center w-full m-0">
         <h1 id="skippistan" class="mx-auto flex-auto p-10 m-0 bg-no-repeat
-            bg-white pl-40 font-bold text-5xl">
-            Chat with Skippy the Magnificent! <br><sub class="text-lg">(From <a
+            bg-white pl-40 font-bold text-3xl">
+            Chat with Skippy the Magnificent! <br><sub class="text-sm">(From <a
                 href="https://www.craigalanson.com/books" target="_blank" rel="noopener noreferrer"
                 class="animate-pulse">Craig Alanson's ExForce series</a>) using golang, gin, and OpenAI's GPT-4 model \\ <a
                 href="https://github.com/doctor-ew/go_skippy_lc" target="_blank"
@@ -79,6 +86,14 @@
                 </form>
             </div>
             <div id="chat_log" class="chat_log grid grid-cols-2 gap-4 flex"></div>
+        </div>
+    </section>
+    <section id="foxtrot-codex" class="items-center w-full m-0">
+        <h1 id="skippistan" class="mx-auto flex-auto p-10 m-0 bg-no-repeat bg-white pl-40 font-bold text-3xl">
+            Write `I will not use ChatGPT to code` 500 times in {programmingLanguage}!
+        </h1>
+        <div class="chalkboard grid grid-cols-1 gap-4 flex">
+            <pre class="code-output">{foxtrotCode}</pre>
         </div>
     </section>
 </main>
@@ -102,4 +117,31 @@
     .read-the-docs {
         color: #888;
     }
+
+    #foxtrot-codex {
+    background: url('../../public/foxtrot-codex-chalkboard.png') no-repeat bottom;
+    background-size: contain; /* Ensure the image fits within the container */
+    position: relative; /* Ensure positioned elements are relative to this container */
+    padding-bottom: 0; /* Remove any additional padding */
+    min-height: 500px; /* Ensure there is enough space for the chalkboard */
+}
+
+.code-output {
+    width: 100%; /* Make the code output take the full width of the parent */
+    max-width: 610px; /* Maximum width to ensure it fits within the green section */
+    margin: 0; /* Center the code output */
+    padding: 2rem;
+    background-color: rgba(0, 128, 0, 0.8); /* Green chalkboard color */
+    color: white;
+    font-family: 'Source Code Pro', monospace;
+    overflow: auto;
+    position: absolute; /* Position the code output within the parent */
+    
+    bottom: 50px; /* Align the code output to the bottom of the chalkboard */
+    /* left: 50%; */ /* Center the code output horizontally */
+    /* transform: translateX(-50%); */ /* Center the code output horizontally */
+    max-height: calc(100% - 4rem); /* Ensure the code output fits within the container */
+    min-height: 275px; /* Minimum height to ensure enough space for the code */
+}
+
 </style>
