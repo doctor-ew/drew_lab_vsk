@@ -32,11 +32,11 @@
 
             <h2 id="doctorew"
                 class="mx-auto flex-grow p-10 m-0 bg-no-repeat bg-white bg-opacity-80 pl-40 font-bold text-xl">
-                <span class="block text-3xl mt-2 mb-4">Andrew Schillinger<sup>(He/Him)</sup></span>
+                <span class="block text-3xl mt-2 mb-4 underline font-black">Andrew Schillinger<sup>(He/Him)</sup></span>
                 <ul>
                     <li class="inline">Senior Technology Executive</li>
                     <li class="inline"> ● AI Leader</li>
-                    <li class="inline"> ● Director of Emerging Technology &amp; Innovation</li>
+                    <li class="inline"> ● CTO/Director of Emerging Technology &amp; Innovation</li>
                     <li class="inline"> ● Business Growth Strategy</li>
                     <li class="inline"> ● 15+ years’ experience delivering data-driven digital disruption that
                         transforms the way people connect
