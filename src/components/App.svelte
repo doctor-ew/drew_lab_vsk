@@ -142,6 +142,7 @@
     /* transform: translateX(-50%); */ /* Center the code output horizontally */
     max-height: calc(100% - 4rem); /* Ensure the code output fits within the container */
     min-height: 275px; /* Minimum height to ensure enough space for the code */
+    white-space: break-spaces; /* Allow the code to break at spaces */
 }
 
 </style>
