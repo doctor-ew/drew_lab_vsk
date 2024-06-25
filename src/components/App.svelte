@@ -12,92 +12,83 @@
     let canvasElement;
     let foxtrotCode = "";
     let programmingLanguage = "";
+    let isLoading = false;
+    let languageSelector: HTMLSelectElement;
 
+    onMount(() => {
+        initApp(canvasElement);
+        relay_message();
+        refreshFoxtrotCode();
+    });
 
-  onMount(() => {
-    initApp(canvasElement);
-    relay_message();
-    refreshFoxtrotCode();
-  });
-
-  async function refreshFoxtrotCode(language = "") {
-    try {
-      const result = await fetchFoxtrotCode(language);
-      programmingLanguage = result.language;
-      foxtrotCode = result.code;
-    } catch (error) {
-      console.error("Error fetching Foxtrot code:", error);
-            foxtrotCode = `{programmingLanguage} fried Skippy's circuits`;
+    async function refreshFoxtrotCode(language = "") {
+        isLoading = true;
+        try {
+            const result = await fetchFoxtrotCode(language);
+            programmingLanguage = result.language;
+            foxtrotCode = result.code;
+            setLanguageSelector(result.language);
+        } catch (error) {
+            console.error("Error fetching Foxtrot code:", error);
+            foxtrotCode = `${programmingLanguage} fried Skippy's circuits`;
+        } finally {
+            isLoading = false;
         }
     }
 
-  function handleLanguageChange(event) {
-    const selectedLanguage = event.target.value;
-    refreshFoxtrotCode(selectedLanguage);
-  }
+    function handleLanguageChange(event) {
+        const selectedLanguage = event.target.value;
+        refreshFoxtrotCode(selectedLanguage);
+    }
 
-  function handleRandomButtonClick() {
-    refreshFoxtrotCode();
-  }
+    function handleRandomButtonClick() {
+        const randomLanguage = programmingLanguages[Math.floor(Math.random() * programmingLanguages.length)];
+        refreshFoxtrotCode(randomLanguage);
+    }
+
+    function setLanguageSelector(language) {
+        if (languageSelector) {
+            languageSelector.value = language;
+        }
+    }
 </script>
+
 <canvas bind:this={canvasElement} id="c" class="fixed top-0 left-0 flex-grow min-h-0 min-w-0 h-screen w-screen" width="1416" height="1091"></canvas>
 
-<main id="main"
-      class="main relative flex-grow container mx-auto justify-center max-w-screen-lg space-y-10 bg-white bg-opacity-50 w-full">
+<main id="main" class="main relative flex-grow container mx-auto justify-center max-w-screen-lg space-y-10 bg-white bg-opacity-50 w-full">
     <section id="top" class="items-center w-full m-0">
-        <!-- <picture>
-    <source srcset='https://www.doctorew.com/shuttlebay/doctor-doctor-doctor.webp' type='image/webp' />
-    </picture> -->
         <h1 id="welcome" class="mx-auto flex-grow p-10 m-0 bg-no-repeat bg-white pl-40 font-bold text-5xl">
             Welcome to DoctorEw's Lab
         </h1>
         <div id="doctorew_contact">
-
-            <h2 id="doctorew"
-                class="mx-auto flex-grow p-10 m-0 bg-no-repeat bg-white bg-opacity-80 pl-40 font-bold text-xl">
+            <h2 id="doctorew" class="mx-auto flex-grow p-10 m-0 bg-no-repeat bg-white bg-opacity-80 pl-40 font-bold text-xl">
                 <span class="block text-3xl mt-2 mb-4 underline font-black">Andrew Schillinger<sup>(He/Him)</sup></span>
                 <ul>
                     <li class="inline">Senior Technology Executive</li>
                     <li class="inline"> ● AI Leader</li>
-                    <li class="inline"> ● CTO/Director of Emerging Technology &amp; Innovation</li>
+                    <li class="inline"> ● CTO/Director of Emerging Technology & Innovation</li>
                     <li class="inline"> ● Business Growth Strategy</li>
-                    <li class="inline"> ● 15+ years’ experience delivering data-driven digital disruption that
-                        transforms the way people connect
-                    </li>
+                    <li class="inline"> ● 15+ years’ experience delivering data-driven digital disruption that transforms the way people connect</li>
                 </ul>
             </h2>
-            <h3 id="contact-area"
-                class="mx-auto flex-grow p-10 m-0 bg-no-repeat bg-white bg-opacity-80 pl-40 pt-0 font-bold text-xl">
-                <a href="https://www.linkedin.com/in/andrew-schillinger/" target="_blank" rel="noopener noreferrer"
-                   class="animate-pulse">LinkedIn</a> \\ <a href="https://github.com/doctor-ew/" target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            class="animate-pulse hover:animate-bounce">github</a> \\ <a
-                    href="https://www.doctorew.com/Andrew_Schillinger_resume_engineering.pdf" target="_blank"
-                    rel="noopener noreferrer" class="animate-pulse hover:animate-bounce">resume</a> \\ <a
-                    href="https://www.doctorew.medium.com/" target="_blank" rel="noopener noreferrer"
-                    class="animate-pulse hover:animate-bounce">blog</a> \\ <a href="javascript:void(0);"
-                                                                              rel="noopener noreferrer"
-                                                                              class="animate-pulse hover:animate-bounce">drew[at]doctorew[dot]com</a>
+            <h3 id="contact-area" class="mx-auto flex-grow p-10 m-0 bg-no-repeat bg-white bg-opacity-80 pl-40 pt-0 font-bold text-xl">
+                <a href="https://www.linkedin.com/in/andrew-schillinger/" target="_blank" rel="noopener noreferrer" class="animate-pulse">LinkedIn</a> \\ 
+                <a href="https://github.com/doctor-ew/" target="_blank" rel="noopener noreferrer" class="animate-pulse hover:animate-bounce">github</a> \\ 
+                <a href="https://www.doctorew.com/Andrew_Schillinger_resume_engineering.pdf" target="_blank" rel="noopener noreferrer" class="animate-pulse hover:animate-bounce">resume</a> \\ 
+                <a href="https://www.doctorew.medium.com/" target="_blank" rel="noopener noreferrer" class="animate-pulse hover:animate-bounce">blog</a> \\ 
+                <a href="javascript:void(0);" rel="noopener noreferrer" class="animate-pulse hover:animate-bounce">drew[at]doctorew[dot]com</a>
             </h3>
         </div>
     </section>
     <section id="chat" class="items-center w-full m-0">
-        <h1 id="skippistan" class="mx-auto flex-auto p-10 m-0 bg-no-repeat
-            bg-white pl-40 font-bold text-3xl">
-            Chat with Skippy the Magnificent! <br><sub class="text-sm">(From <a
-                href="https://www.craigalanson.com/books" target="_blank" rel="noopener noreferrer"
-                class="animate-pulse">Craig Alanson's ExForce series</a>) using golang, gin, and OpenAI's GPT-4 model \\ <a
-                href="https://github.com/doctor-ew/go_skippy_lc" target="_blank"
-                rel="noopener noreferrer" class="animate-pulse hover:animate-bounce">repo</a> </sub>
+        <h1 id="skippistan" class="mx-auto flex-auto p-10 m-0 bg-no-repeat bg-white pl-40 font-bold text-3xl">
+            Chat with Skippy the Magnificent! <br><sub class="text-sm">(From <a href="https://www.craigalanson.com/books" target="_blank" rel="noopener noreferrer" class="animate-pulse">Craig Alanson's ExForce series</a>) using golang, gin, and OpenAI's GPT-4 model \\ <a href="https://github.com/doctor-ew/go_skippy_lc" target="_blank" rel="noopener noreferrer" class="animate-pulse hover:animate-bounce">repo</a></sub>
         </h1>
         <div class="chat_holder grid grid-cols-1 gap-4 flex">
             <div class="form_holder block mb-6">
                 <form class="mx-auto p-6">
-                    <!-- <div class='input text '> -->
                     <label for="chat_box" class="active"></label>
-                    <textarea id="chat_box" class="textarea w-full text-gray-200" name="chat_box"
-                              placeholder="Chat with Skippy the Magnificent!" required=""></textarea>
-                    <!-- </div> -->
+                    <textarea id="chat_box" class="textarea w-full text-gray-200" name="chat_box" placeholder="Chat with Skippy the Magnificent!" required=""></textarea>
                     <button type="submit" name="submit" class="submit hidden" id="chat_submit">Submit</button>
                 </form>
             </div>
@@ -106,22 +97,24 @@
     </section>
     <section id="foxtrot-codex" class="items-center w-full m-0">
         <div class="cb_top_holder bg-white block">
-        <h1 id="skippistan" class="mx-auto flex-auto p-10 m-0 bg-no-repeat bg-white pl-40 font-bold text-3xl">
-            Write `I will not use ChatGPT to code` 500 times in {programmingLanguage}!
-        </h1>
-       
-    <div class="form_holder block">
-      <label for="language_selector">Select Language:</label>
-      <select id="language_selector" on:change={handleLanguageChange}>
-        {#each programmingLanguages as language}
-        <option value={language}>{language}</option>
-        {/each}
-      </select>
-      <button on:click={handleRandomButtonClick}>Random</button>
-    </div>
-     </div>
+            <h1 id="skippistan" class="mx-auto flex-auto p-10 m-0 bg-no-repeat bg-white pl-40 font-bold text-3xl">
+                Write `I will not use ChatGPT to code` 500 times in {programmingLanguage}!
+            </h1>
+            <div class="form_holder block">
+                <label for="language_selector">Select Language:</label>
+                <select id="language_selector" bind:this={languageSelector} on:change={handleLanguageChange}>
+                    {#each programmingLanguages as language}
+                    <option value={language}>{language}</option>
+                    {/each}
+                </select>
+                <button on:click={handleRandomButtonClick}>Random</button>
+            </div>
+        </div>
         <div class="chalkboard grid grid-cols-1 gap-4 flex">
-            <pre class="code-output">{foxtrotCode}</pre>
+            {#if isLoading}
+                <div class="loader"></div>
+            {/if}
+            <pre class="code-output" class:is-hidden={isLoading}>{foxtrotCode}</pre>
         </div>
     </section>
 </main>
@@ -147,114 +140,155 @@
     }
 
     #foxtrot-codex {
-    background: url('../../public/foxtrot-codex-chalkboard.png') no-repeat bottom;
-    background-size: contain; /* Ensure the image fits within the container */
-    position: relative; /* Ensure positioned elements are relative to this container */
-    padding-bottom: 0; /* Remove any additional padding */
-    min-height: 550px; /* Ensure there is enough space for the chalkboard */
-}
-
-.code-output {
-    width: 100%; /* Make the code output take the full width of the parent */
-    max-width: 610px; /* Maximum width to ensure it fits within the green section */
-    margin: 0; /* Center the code output */
-    padding: 2rem;
-    background-color: rgba(0, 128, 0, 0.8); /* Green chalkboard color */
-    color: white;
-    font-family: 'Source Code Pro', monospace;
-    overflow: auto;
-    position: absolute; /* Position the code output within the parent */
-    text-align: left;
-    
-    bottom: 50px; /* Align the code output to the bottom of the chalkboard */
-    /* left: 50%; */ /* Center the code output horizontally */
-    /* transform: translateX(-50%); */ /* Center the code output horizontally */
-    /*max-height: calc(100% - 4rem);*/ /* Ensure the code output fits within the container */
-    height: 275px; /* Minimum height to ensure enough space for the code */
-    white-space: break-spaces; /* Allow the code to break at spaces */
-}
-
-    @media (max-width: 1024px) {
-        #welcome {
-            font-size: 3.5rem;
-            padding-left: 20px;
-        }
-
-        #doctorew_contact, #skippistan {
-            padding-left: 20px;
-        }
-
-        .cb_top_holder {
-            padding: 0 20px;
-        }
-
-        .code-output {
-            padding: 1rem;
-            max-width: calc(100% - 40px);
-        }
-
-        #foxtrot-codex {
-            background-size: cover;
-            min-height: 450px;
-        }
+        background: url('../../public/foxtrot-codex-chalkboard.png') no-repeat bottom;
+        background-size: contain;
+        position: relative;
+        padding-bottom: 0;
+        min-height: 550px;
     }
 
-    @media (max-width: 768px) {
+    .code-output {
+        position: absolute;
+        left: 0;
+        width: 60%;
+        padding: 2rem;
+        background-color: rgba(0, 128, 0, 0.8);
+        color: white;
+        font-family: 'Source Code Pro', monospace;
+        overflow: auto;
+        text-align: left;
+        height: 275px;
+        white-space: break-spaces;
+        font-size: 1rem;
+        bottom: 50px;
+    }
+
+    .loader {
+        width: 80px;
+        height: 70px;
+        border: 5px solid #000;
+        padding: 0 8px;
+        box-sizing: border-box;
+        background:
+            linear-gradient(#fff 0 0) 0 0 / 8px 20px,
+            linear-gradient(#fff 0 0) 100% 0 / 8px 20px,
+            radial-gradient(farthest-side, #fff 90%, #0000) 0 5px / 8px 8px content-box,
+            #000;
+        background-repeat: no-repeat;
+        animation: l3 2s infinite linear;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 10;
+    }
+
+    @keyframes l3 {
+        25% { background-position: 0 0, 100% 100%, 100% calc(100% - 5px); }
+        50% { background-position: 0 100%, 100% 100%, 0 calc(100% - 5px); }
+        75% { background-position: 0 100%, 100% 0, 100% 5px; }
+    }
+
+    .is-hidden {
+        display: none;
+    }
+
+    #language_selector {
+        background-color: #FFBE53;
+    }
+
+    /* Breakpoint 320px */
+    @media (max-width: 320px) {
+        .code-output {
+            width: 60%;
+            left: 0;
+            font-size: 0.8rem;
+        }
         #welcome {
-            font-size: 2.5rem;
+            font-size: 1.5rem;
             padding-left: 10px;
         }
-
         #doctorew_contact, #skippistan {
             padding-left: 10px;
         }
-
         .cb_top_holder {
             padding: 0 10px;
         }
+    }
 
+    /* Breakpoint 480px */
+    @media (min-width: 321px) and (max-width: 480px) {
         .code-output {
-            padding: 0.5rem;
-            max-width: calc(100% - 20px);
+            width: 60%;
+            left: 0;
+            font-size: 0.9rem;
         }
-
-        #foxtrot-codex {
-            background-size: cover;
-            min-height: 400px;
+        #welcome {
+            font-size: 2rem;
+            padding-left: 15px;
+        }
+        #doctorew_contact, #skippistan {
+            padding-left: 15px;
+        }
+        .cb_top_holder {
+            padding: 0 15px;
         }
     }
 
-    @media (max-width: 480px) {
-        #welcome {
-            font-size: 2rem;
-            padding-left: 5px;
-        }
-
-        #doctorew_contact, #skippistan {
-            padding-left: 5px;
-        }
-
-        .cb_top_holder {
-            padding: 0 5px;
-        }
-
+    /* Breakpoint 768px */
+    @media (min-width: 481px) and (max-width: 768px) {
         .code-output {
-            padding: 0.5rem;
-            max-width: calc(100% - 10px);
+            width: 60%;
+            left: 0;
+            font-size: 1rem;
         }
-
-        #foxtrot-codex {
-            background-size: cover;
-            min-height: 350px;
+        #welcome {
+            font-size: 3rem;
+            padding-left: 20px;
         }
-
-        .form_holder {
-            flex-direction: column;
+        #doctorew_contact, #skippistan {
+            padding-left: 20px;
         }
+        .cb_top_holder {
+            padding: 0 20px;
+        }
+    }
 
-        .form_holder label, .form_holder select, .form_holder button {
-            margin-bottom: 10px;
-            width: 100%;
+    /* Breakpoint 1024px */
+    @media (min-width: 769px) and (max-width: 1024px) {
+        .code-output {
+            width: 60%;
+            left: 0;
+            font-size: 1.1rem;
+        }
+        #welcome {
+            font-size: 3.5rem;
+            padding-left: 30px;
+        }
+        #doctorew_contact, #skippistan {
+            padding-left: 30px;
+        }
+        .cb_top_holder {
+            padding: 0 30px;
+        }
+    }
+
+    /* Breakpoint 1280px */
+    @media (min-width: 1025px) and (max-width: 1280px) {
+        .code-output {
+            width: 60%;
+            left: 0;
+            font-size: 1.2rem;
+        }
+        #welcome {
+            font-size: 4rem;
+            padding-left: 40px;
+        }
+        #doctorew_contact, #skippistan {
+            padding-left: 40px;
+        }
+        .cb_top_holder {
+            padding: 0 40px;
         }
     }
 </style>
