@@ -8,17 +8,22 @@
     import { relay_message } from '../scripts/chat.ts';
     import { fetchFoxtrotCode } from '../scripts/foxtrot.ts';
     import { programmingLanguages } from '../scripts/programmingLanguages.ts';
+    import { translationLanguages } from '../scripts/translationLanguages.ts';
 
     let canvasElement;
     let foxtrotCode = "";
     let programmingLanguage = "";
     let isLoading = false;
     let languageSelector: HTMLSelectElement;
+    let translationLanguageSelector: HTMLSelectElement;
+    let translationText = "Hello World";
+    let translatedText = "";
 
     onMount(() => {
         initApp(canvasElement);
         relay_message();
         refreshFoxtrotCode();
+        randomizeTranslation();
     });
 
     async function refreshFoxtrotCode(language = "") {
@@ -39,6 +44,7 @@
     function handleLanguageChange(event) {
         const selectedLanguage = event.target.value;
         refreshFoxtrotCode(selectedLanguage);
+        handleTranslate();
     }
 
     function handleRandomButtonClick() {
@@ -49,6 +55,41 @@
     function setLanguageSelector(language) {
         if (languageSelector) {
             languageSelector.value = language;
+        }
+    }
+
+    function randomizeTranslation() {
+        const randomLanguage = translationLanguages[Math.floor(Math.random() * translationLanguages.length)];
+        translationLanguageSelector.value = randomLanguage.code;
+        handleTranslate();
+    }
+
+    async function handleTranslate() {
+        isLoading = true;
+        try {
+            const response = await fetch('https://skippyts.doctorew.com/translation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    question: `Translate: ${translationText}`,
+                    language: translationLanguageSelector.value,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const result = await response.json();
+            translatedText = result.answer;
+            console.log("|-o-| Translate! [[",translatedText,"]] Result:",result)
+        } catch (error) {
+            console.error("Error translating text:", error);
+            translatedText = "Translation failed.";
+        } finally {
+            isLoading = false;
         }
     }
 </script>
@@ -115,6 +156,33 @@
                 <div class="loader"></div>
             {/if}
             <pre class="code-output" class:is-hidden={isLoading}>{foxtrotCode}</pre>
+        </div>
+    </section>
+    <section id="translation-services" class="items-center w-full m-0">
+        <h1 id="skippy-translate" class="mx-auto flex-auto p-10 m-0 bg-no-repeat bg-white pl-40 font-bold text-3xl">
+            Skippy's Translation Services
+        </h1>
+        <div class="translation_holder grid grid-cols-1 gap-4 flex">
+            <div class="form_holder block mb-6">
+                <form class="mx-auto p-6" on:submit|preventDefault={handleTranslate}>
+                    <label for="translation_box" class="active"></label>
+                    <textarea id="translation_box" class="textarea w-full text-gray-200" bind:value={translationText} name="translation_box" placeholder="Enter text to translate..." required=""></textarea>
+                    <div class="flex items-center mt-4">
+                        <select id="translation_language_selector" bind:this={translationLanguageSelector} on:change={handleTranslate}>
+                            {#each translationLanguages as language}
+                            <option value={language.code}>{language.name}</option>
+                            {/each}
+                        </select>
+                        <button type="submit" name="submit" class="submit ml-4" id="translate_submit">Translate</button>
+                        <button type="button" name="random" class="submit ml-4" on:click={randomizeTranslation}>Random</button>
+                    </div>
+                </form>
+            </div>
+            {#if translatedText}
+                <div id="translated_text" class="translated_text w-full p-6 bg-white bg-opacity-80">
+                    {translatedText}
+                </div>
+            {/if}
         </div>
     </section>
 </main>
@@ -193,8 +261,12 @@
         display: none;
     }
 
-    #language_selector {
+    #language_selector, #translation_language_selector {
         background-color: #FFBE53;
+    }
+
+    #translated_text {
+        background-color: rgba(255, 255, 255, 0.8);
     }
 
     /* Breakpoint 320px */
