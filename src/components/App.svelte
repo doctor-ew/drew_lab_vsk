@@ -123,7 +123,7 @@
     </section>
     <section id="chat" class="items-center w-full m-0">
         <h1 id="skippistan" class="mx-auto flex-auto p-10 m-0 bg-no-repeat bg-white pl-40 font-bold text-3xl">
-            Chat with Skippy the Magnificent! <br><sub class="text-sm">(From <a href="https://www.craigalanson.com/books" target="_blank" rel="noopener noreferrer" class="animate-pulse">Craig Alanson's ExForce series</a>) using golang, gin, and OpenAI's GPT-4 model \\ <a href="https://github.com/doctor-ew/go_skippy_lc" target="_blank" rel="noopener noreferrer" class="animate-pulse hover:animate-bounce">repo</a></sub>
+            Chat with Skippy the Magnificent! <br><sub class="text-sm">(From <a href="https://www.craigalanson.com/books" target="_blank" rel="noopener noreferrer" class="animate-pulse">Craig Alanson's ExForce series</a>) using TypeScript, Lambda, Serverless, and Svelte, and OpenAI's GPT-4 model \\ <a href="https://github.com/doctor-ew/go_skippy_lc" target="_blank" rel="noopener noreferrer" class="animate-pulse hover:animate-bounce">repo</a></sub>
         </h1>
         <div class="chat_holder grid grid-cols-1 gap-4 flex">
             <div class="form_holder block mb-6">
@@ -179,9 +179,9 @@
                 </form>
             </div>
             {#if translatedText}
-                <div id="translated_text" class="translated_text w-full p-6 bg-white bg-opacity-80">
+                <pre id="translated_text" class="translated_text w-full p-6 bg-white bg-opacity-80 whitespace-pre-wrap">
                     {translatedText}
-                </div>
+                </pre>
             {/if}
         </div>
     </section>
