@@ -127,10 +127,10 @@
         </h1>
         <div class="chat_holder grid grid-cols-1 gap-4 flex">
             <div class="form_holder block mb-6">
-                <form class="mx-auto p-6">
+                <form class="mx-auto p-6" on:submit|preventDefault={relay_message}>
                     <label for="chat_box" class="active"></label>
                     <textarea id="chat_box" class="textarea w-full text-gray-200" name="chat_box" placeholder="Chat with Skippy the Magnificent!" required=""></textarea>
-                    <button type="submit" name="submit" class="submit hidden" id="chat_submit">Submit</button>
+                    <button type="submit" name="submit" class="submit" id="chat_submit">Submit</button>
                 </form>
             </div>
             <div id="chat_log" class="chat_log grid grid-cols-2 gap-4 flex"></div>
