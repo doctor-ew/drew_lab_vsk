@@ -20,6 +20,7 @@ export const fetch_message = async (
     personality
   );
 
+  const sendPersonality = personality?.name || personality;
   const settings = {
     method: "POST",
     headers: {
@@ -28,10 +29,15 @@ export const fetch_message = async (
     },
     body: JSON.stringify({
       question: message,
-      personality: personality.name,
+      personality: sendPersonality,
     }),
   };
-  console.log("|-ct-| |-00-| settings:", settings);
+  console.log(
+    "|-ct-| |-00-| settings:",
+    settings,
+    " :: sendPersonality:",
+    sendPersonality
+  );
   try {
     const message_response = await fetch(uri, settings);
     if (!message_response.ok) {
@@ -177,8 +183,8 @@ export const display_message = (
     "bg-white"
   );
   messageType === "lowly_human"
-    ? new_p.classList.add("pl-40")
-    : new_p.classList.add("pl-36");
+    ? new_p.classList.add("pl-10")
+    : new_p.classList.add("pl-6");
   new_p.classList.add(
     "chat_log_item_line",
     "bg-white",
@@ -189,16 +195,16 @@ export const display_message = (
   );
 
   new_p.textContent = messageText;
-  if (display_name !== "human") {
-    new_h3.textContent = display_name;
-    new_h3.classList.add(
-      "chat_log_item_name",
-      "text-lg",
-      "font-bold",
-      "underline"
-    );
-    new_div.appendChild(new_h3);
-  }
+  //if (display_name !== "human") {
+  new_h3.textContent = display_name || messageType;
+  new_h3.classList.add(
+    "chat_log_item_name",
+    "text-lg",
+    "font-bold",
+    "underline"
+  );
+  new_div.appendChild(new_h3);
+  //}
   new_div.appendChild(new_p);
   div_chat_log.appendChild(new_div);
 };
