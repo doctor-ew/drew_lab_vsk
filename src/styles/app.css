@@ -104,13 +104,13 @@ button:focus-visible {
     }
 
 
-    #skippistan,
-    .skippy_the_magnificent {
+    #skippistan /* .skippy_the_magnificent */ {
         background-image: url(https://www.doctorew.com/shuttlebay/skippy.svg)
     }
 
     .lowly_human {
-        background-image: url(https://www.doctorew.com/shuttlebay/merry-band-of-pirates.svg)
+        background-image: url(https://www.doctorew.com/shuttlebay/axis_of_awesome.svg) /* https://www.doctorew.com/shuttlebay/merry-band-of-pirates.svg */
+        
     }
 
     sub,

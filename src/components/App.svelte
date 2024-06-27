@@ -28,7 +28,6 @@
         initial_load(selectedPersonality);
         refreshFoxtrotCode();
         randomizeTranslation();
-        setPersonalitySelector();
     });
 
     async function refreshFoxtrotCode(language = "") {
@@ -99,26 +98,13 @@
     }
 
     function handlePersonalityChange(event) {
-        selectedPersonality = event.target.value;
+        const selectedOption = event.target.options[event.target.selectedIndex];
+        selectedPersonality = {
+            display_name: selectedOption.text,
+            name: selectedOption.value,
+            icon: selectedOption.dataset.icon
+        };
         console.log("|-AS-| |-o-| handlePersonalityChange :: Personality changed to:", selectedPersonality);
-    }
-
-    function setPersonalitySelector() {
-        if (personalitySelector) {
-            personalitySelector.value = selectedPersonality;
-        }
-    }
-
-    const getSelectedPersonality = () => {
-        // Get the select element
-        const selectElement = document.getElementById("personality_selector") as HTMLSelectElement;
-
-        // Get the selected option
-        const selectedPersonality = selectElement.options[selectElement.selectedIndex].value;
-
-        console.log(selectedPersonality);
-
-        return selectedPersonality.value;
     }
 
     function handleRelayMessage(event) {
@@ -126,12 +112,8 @@
         console.log("|-AS-| |-o-| handleRelayMessage:", event, " :: selectedPersonality: ",selectedPersonality);
         const chatBox = document.querySelector("#chat_box") as HTMLTextAreaElement;
         const userMessage = chatBox.value.trim();
-        if (!selectedPersonality) {
-            selectedPersonality = getSelectedPersonality();
-        }
-        console.log("|-AS-| |-oo-| handleRelayMessage:", event, " :: selectedPersonality: ",selectedPersonality);
         if (userMessage) {
-            relay_message(userMessage, selectedPersonality);
+            relay_message(userMessage, selectedPersonality.name);
         }
     }
 </script>
@@ -165,15 +147,15 @@
     </section>
     <section id="chat" class="items-center w-full m-0">
         <h1 id="skippistan" class="mx-auto flex-auto p-10 m-0 bg-no-repeat bg-white pl-40 font-bold text-3xl">
-            Chat with {selectedPersonality}! <br><sub class="text-sm">coded using TypeScript, Lambda, Serverless, Sveltekit, and OpenAI's GPT-4 model \\ <a href="https://github.com/doctor-ew/drew_lab_vsk" target="_blank" rel="noopener noreferrer" class="animate-pulse hover:animate-bounce">repo</a></sub>
+            Chat with {selectedPersonality.display_name}! <br><sub class="text-sm">(From <a href="https://www.craigalanson.com/books" target="_blank" rel="noopener noreferrer" class="animate-pulse">Craig Alanson's ExForce series</a>) using TypeScript, Lambda, Serverless, and Svelte, and OpenAI's GPT-4 model \\ <a href="https://github.com/doctor-ew/go_skippy_lc" target="_blank" rel="noopener noreferrer" class="animate-pulse hover:animate-bounce">repo</a></sub>
         </h1>
         <div class="form_holder block mb-6">
             <form class="mx-auto p-6" on:submit={handleRelayMessage}>
                 <label for="chat_box" class="active"></label>
-                <textarea id="chat_box" class="textarea w-full text-gray-200" name="chat_box" placeholder="Chat with {selectedPersonality}!" required=""></textarea>
+                <textarea id="chat_box" class="textarea w-full text-gray-200" name="chat_box" placeholder="Chat with {selectedPersonality.display_name}!" required=""></textarea>
                 <select id="personality_selector" bind:this={personalitySelector} on:change={handlePersonalityChange}>
                     {#each personalities as personality}
-                    <option value={personality.name}>{personality.name}</option>
+                    <option value={personality.name} data-icon={personality.icon}>{personality.display_name}</option>
                     {/each}
                 </select>
                 <button type="submit" name="submit" class="submit" id="chat_submit">Submit</button>
@@ -183,7 +165,7 @@
             {#each conversation as chat}
             <div class="{chat.type}">
                 <img src={`/icons/${chat.type}.png`} alt={chat.type} class="chat_icon" />
-                <p>{chat.text}</p>
+                <p><strong><u>{chat.type}</u></strong>: {chat.text}</p>
             </div>
             {/each}
         </div>

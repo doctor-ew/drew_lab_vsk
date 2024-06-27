@@ -28,7 +28,7 @@ export const fetch_message = async (
     },
     body: JSON.stringify({
       question: message,
-      personality: personality,
+      personality: personality.name,
     }),
   };
   console.log("|-ct-| |-00-| settings:", settings);
@@ -69,14 +69,28 @@ export const initial_load = (personality: string) => {
   if (isInitialLoad) {
     isInitialLoad = false;
 
+    // Select the correct option in the personality dropdown
+    const personalitySelector = document.getElementById(
+      "personality_selector"
+    ) as HTMLSelectElement;
+    if (personalitySelector) {
+      personalitySelector.value = personality.name;
+    }
+
+    //selectedPersonality = personality.name;
+
     // Display the initial human message
-    display_message("lowly_human", message);
+    display_message("lowly_human", message, "human");
 
     // Fetch Skippy's response to the initial message
     fetch_message(message, personality).then((response) => {
       console.log("|-ct-| |-o-| Initial response from Skippy:", response);
       conversation.push({ type: "skippy_the_magnificent", text: response });
-      display_message("skippy_the_magnificent", response);
+      display_message(
+        "skippy_the_magnificent",
+        response,
+        personality.display_name
+      );
     });
   }
 };
@@ -97,8 +111,14 @@ export const relay_message = async (event: Event, personality: string) => {
     const selectedPersonality =
       personalitySelector.options[personalitySelector.selectedIndex].value;
 
-    console.log(selectedPersonality);
     personality = selectedPersonality;
+
+    console.log(
+      "|-ct-| |-o-| relay_message :: selectedPersonality:",
+      selectedPersonality,
+      ":: personality: ",
+      personality
+    );
     //return selectedPersonality.value;
   }
 
@@ -108,7 +128,7 @@ export const relay_message = async (event: Event, personality: string) => {
     conversation.push({ type: "lowly_human", text: userMessage });
 
     // Display the user's message
-    display_message("lowly_human", userMessage);
+    display_message("lowly_human", userMessage, "human");
 
     // Fetch Skippy's response and display it
     console.log(
@@ -119,12 +139,24 @@ export const relay_message = async (event: Event, personality: string) => {
     );
     const response = await fetch_message(userMessage, personality);
     conversation.push({ type: personality, text: response });
-    display_message(personality, response);
+    display_message(personality, response, personality.display_name);
   }
 };
 
 // Function to display messages
-export const display_message = (messageType: string, messageText: string) => {
+export const display_message = (
+  messageType: string,
+  messageText: string,
+  display_name: string
+) => {
+  console.log(
+    "|-ct-| |-o-| display_message function called. messageType:",
+    messageType,
+    " :: messageText:",
+    messageText,
+    " :: display_name: ",
+    display_name
+  );
   const div_chat_log = document.getElementById("chat_log");
 
   if (!div_chat_log) {
@@ -133,6 +165,7 @@ export const display_message = (messageType: string, messageText: string) => {
   }
 
   let new_div = document.createElement("div");
+  let new_h3 = document.createElement("h3");
   let new_p = document.createElement("p");
 
   new_div.classList.add(messageType);
@@ -154,16 +187,22 @@ export const display_message = (messageType: string, messageText: string) => {
     "w-full",
     "h-full"
   );
+
   new_p.textContent = messageText;
+  if (display_name !== "human") {
+    new_h3.textContent = display_name;
+    new_h3.classList.add("chat_log_item_name", "text-sm", "text-gray-400");
+    new_div.appendChild(new_h3);
+  }
   new_div.appendChild(new_p);
   div_chat_log.appendChild(new_div);
 };
 
 export const randomizePersonality = (
-  personalities: { name: string; icon: string }[]
+  personalities: { name: string; icon: string; display_name: string }[]
 ): string => {
   const randomIndex = Math.floor(Math.random() * personalities.length);
-  return personalities[randomIndex].name;
+  return personalities[randomIndex];
 };
 
 // Ensure initial_load is called once the DOM is fully loaded
