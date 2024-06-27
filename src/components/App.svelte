@@ -5,7 +5,7 @@
     import anime from 'animejs';
     import { onMount } from 'svelte';
     import { initApp } from '../scripts/appScript.ts';
-    import { relay_message, fetch_message, initial_load } from '../scripts/chat.ts';
+    import { relay_message, fetch_message, initial_load, randomizePersonality } from '../scripts/chat.ts';
     import { fetchFoxtrotCode } from '../scripts/foxtrot.ts';
     import { programmingLanguages } from '../scripts/programmingLanguages.ts';
     import { translationLanguages } from '../scripts/translationLanguages.ts';
@@ -19,15 +19,16 @@
     let translationLanguageSelector: HTMLSelectElement;
     let translationText = "Hello World";
     let translatedText = "";
-    let selectedPersonality = "skippy";
+    let selectedPersonality = randomizePersonality(personalities);
     let personalitySelector: HTMLSelectElement;
     let conversation = [];
 
     onMount(() => {
         initApp(canvasElement);
-        initial_load();
+        initial_load(selectedPersonality);
         refreshFoxtrotCode();
         randomizeTranslation();
+        setPersonalitySelector();
     });
 
     async function refreshFoxtrotCode(language = "") {
@@ -102,13 +103,33 @@
         console.log("|-AS-| |-o-| handlePersonalityChange :: Personality changed to:", selectedPersonality);
     }
 
+    function setPersonalitySelector() {
+        if (personalitySelector) {
+            personalitySelector.value = selectedPersonality;
+        }
+    }
+
+    const getSelectedPersonality = () => {
+        // Get the select element
+        const selectElement = document.getElementById("personality_selector") as HTMLSelectElement;
+
+        // Get the selected option
+        const selectedPersonality = selectElement.options[selectElement.selectedIndex].value;
+
+        console.log(selectedPersonality);
+
+        return selectedPersonality.value;
+    }
+
     function handleRelayMessage(event) {
-        event.preventDefault();
-        console.log("|-AS-| |-o-| handleRelayMessage:", event, " :: selectedPersonality: ", selectedPersonality);
+
+        console.log("|-AS-| |-o-| handleRelayMessage:", event, " :: selectedPersonality: ",selectedPersonality);
         const chatBox = document.querySelector("#chat_box") as HTMLTextAreaElement;
         const userMessage = chatBox.value.trim();
-        selectedPersonality = personalitySelector.value; // Ensure we get the latest selected personality
-        console.log("|-AS-| |-oo-| handleRelayMessage:", event, " :: selectedPersonality: ", selectedPersonality);
+        if (!selectedPersonality) {
+            selectedPersonality = getSelectedPersonality();
+        }
+        console.log("|-AS-| |-oo-| handleRelayMessage:", event, " :: selectedPersonality: ",selectedPersonality);
         if (userMessage) {
             relay_message(userMessage, selectedPersonality);
         }
@@ -144,7 +165,7 @@
     </section>
     <section id="chat" class="items-center w-full m-0">
         <h1 id="skippistan" class="mx-auto flex-auto p-10 m-0 bg-no-repeat bg-white pl-40 font-bold text-3xl">
-            Chat with {selectedPersonality}! <br><sub class="text-sm">(From <a href="https://www.craigalanson.com/books" target="_blank" rel="noopener noreferrer" class="animate-pulse">Craig Alanson's ExForce series</a>) using TypeScript, Lambda, Serverless, and Svelte, and OpenAI's GPT-4 model \\ <a href="https://github.com/doctor-ew/go_skippy_lc" target="_blank" rel="noopener noreferrer" class="animate-pulse hover:animate-bounce">repo</a></sub>
+            Chat with {selectedPersonality}! <br>coded using TypeScript, Lambda, Serverless, Sveltekit, and OpenAI's GPT-4 model \\ <a href="https://github.com/doctor-ew/drew_lab_vsk" target="_blank" rel="noopener noreferrer" class="animate-pulse hover:animate-bounce">repo</a></sub>
         </h1>
         <div class="form_holder block mb-6">
             <form class="mx-auto p-6" on:submit={handleRelayMessage}>
@@ -292,7 +313,7 @@
         display: none;
     }
 
-    #language_selector, #translation_language_selector {
+    #language_selector, #translation_language_selector, #personality_selector {
         background-color: #FFBE53;
     }
 

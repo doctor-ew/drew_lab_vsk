@@ -1,3 +1,5 @@
+import { personalities } from "./personalities";
+
 export let logger: any = {};
 let message: string = "What's up, Doc?";
 let conversation: { type: string; text: string }[] = [];
@@ -56,10 +58,12 @@ export const fetch_message = async (
 };
 
 // Function to handle the initial load of the application
-export const initial_load = () => {
+export const initial_load = (personality: string) => {
   console.log(
     "|-ct-| |-o-| initial_load function called. isInitialLoad:",
-    isInitialLoad
+    isInitialLoad,
+    " :: personality:",
+    personality
   );
 
   if (isInitialLoad) {
@@ -69,7 +73,7 @@ export const initial_load = () => {
     display_message("lowly_human", message);
 
     // Fetch Skippy's response to the initial message
-    fetch_message(message, "skippy").then((response) => {
+    fetch_message(message, personality).then((response) => {
       console.log("|-ct-| |-o-| Initial response from Skippy:", response);
       conversation.push({ type: "skippy_the_magnificent", text: response });
       display_message("skippy_the_magnificent", response);
@@ -155,8 +159,15 @@ export const display_message = (messageType: string, messageText: string) => {
   div_chat_log.appendChild(new_div);
 };
 
+export const randomizePersonality = (
+  personalities: { name: string; icon: string }[]
+): string => {
+  const randomIndex = Math.floor(Math.random() * personalities.length);
+  return personalities[randomIndex].name;
+};
+
 // Ensure initial_load is called once the DOM is fully loaded
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("|-o-| DOMContentLoaded event fired. Initial load call");
-  initial_load();
+  console.log("|-ct-| |-o-| DOMContentLoaded event fired. Initial load call");
+  initial_load(randomizePersonality(personalities));
 });
