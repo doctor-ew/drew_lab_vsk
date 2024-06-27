@@ -191,7 +191,12 @@ export const display_message = (
   new_p.textContent = messageText;
   if (display_name !== "human") {
     new_h3.textContent = display_name;
-    new_h3.classList.add("chat_log_item_name", "text-sm", "text-gray-400");
+    new_h3.classList.add(
+      "chat_log_item_name",
+      "text-lg",
+      "font-bold",
+      "underline"
+    );
     new_div.appendChild(new_h3);
   }
   new_div.appendChild(new_p);
