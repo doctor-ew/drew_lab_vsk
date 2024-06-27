@@ -6,9 +6,17 @@ export const uri: string = "https://skippyts.doctorew.com/chatbot";
 // Flag to prevent duplicate calls on initial load
 let isInitialLoad = true;
 
-// Function to fetch message from the server
-const fetch_message = async (initial = false) => {
-  console.log("|-o-| fetch_message function called. Initial:", initial);
+// Function to fetch message from the server with personality
+export const fetch_message = async (
+  message: string,
+  personality: string
+): Promise<string> => {
+  console.log(
+    "|-ct-| |-o-| fetch_message function called. Message:",
+    message,
+    "Personality:",
+    personality
+  );
 
   const settings = {
     method: "POST",
@@ -18,9 +26,10 @@ const fetch_message = async (initial = false) => {
     },
     body: JSON.stringify({
       question: message,
+      personality: personality,
     }),
   };
-
+  console.log("|-ct-| |-00-| settings:", settings);
   try {
     const message_response = await fetch(uri, settings);
     if (!message_response.ok) {
@@ -39,26 +48,17 @@ const fetch_message = async (initial = false) => {
     }
 
     const data = await message_response.json();
-    let skippyResponse = data.answer || "No response from Skippy.";
-
-    // Add Skippy's response to the conversation array
-    conversation.push({
-      type: "skippy_the_magnificent",
-      text: skippyResponse,
-    });
-
-    // Display Skippy's response
-    display_message("skippy_the_magnificent", skippyResponse);
+    return data.answer || "No response from Skippy.";
   } catch (error) {
     console.log(`ERROR! ${error}`);
-    message = "returned_message";
+    return "Error fetching message.";
   }
 };
 
 // Function to handle the initial load of the application
-const initial_load = () => {
+export const initial_load = () => {
   console.log(
-    "|-o-| initial_load function called. isInitialLoad:",
+    "|-ct-| |-o-| initial_load function called. isInitialLoad:",
     isInitialLoad
   );
 
@@ -69,15 +69,34 @@ const initial_load = () => {
     display_message("lowly_human", message);
 
     // Fetch Skippy's response to the initial message
-    fetch_message(true);
+    fetch_message(message, "skippy").then((response) => {
+      console.log("|-ct-| |-o-| Initial response from Skippy:", response);
+      conversation.push({ type: "skippy_the_magnificent", text: response });
+      display_message("skippy_the_magnificent", response);
+    });
   }
 };
 
 // Function to handle user-submitted messages
-export const relay_message = () => {
-  console.log("|-o-| Form submitted");
-  const chat_box = document.querySelector("#chat_box") as HTMLInputElement;
+export const relay_message = async (event: Event, personality: string) => {
+  //event?.preventDefault();
+  console.log("|-ct-| |-o-| Form submitted :: personality: ", personality);
+  const chat_box = document.querySelector("#chat_box") as HTMLTextAreaElement;
   const userMessage = chat_box.value.trim();
+
+  if (!personality) {
+    const personalitySelector = document.getElementById(
+      "personality_selector"
+    ) as HTMLSelectElement;
+
+    // Get the selected option
+    const selectedPersonality =
+      personalitySelector.options[personalitySelector.selectedIndex].value;
+
+    console.log(selectedPersonality);
+    personality = selectedPersonality;
+    //return selectedPersonality.value;
+  }
 
   if (userMessage) {
     message = userMessage;
@@ -88,7 +107,15 @@ export const relay_message = () => {
     display_message("lowly_human", userMessage);
 
     // Fetch Skippy's response and display it
-    fetch_message();
+    console.log(
+      "|-ct-| |-OOO-| Fetching message from server. User message:",
+      userMessage,
+      "Personality:",
+      personality
+    );
+    const response = await fetch_message(userMessage, personality);
+    conversation.push({ type: personality, text: response });
+    display_message(personality, response);
   }
 };
 
