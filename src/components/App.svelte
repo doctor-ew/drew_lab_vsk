@@ -165,7 +165,7 @@
     </section>
     <section id="chat" class="items-center w-full m-0">
         <h1 id="skippistan" class="mx-auto flex-auto p-10 m-0 bg-no-repeat bg-white pl-40 font-bold text-3xl">
-            Chat with {selectedPersonality}! <br>coded using TypeScript, Lambda, Serverless, Sveltekit, and OpenAI's GPT-4 model \\ <a href="https://github.com/doctor-ew/drew_lab_vsk" target="_blank" rel="noopener noreferrer" class="animate-pulse hover:animate-bounce">repo</a></sub>
+            Chat with {selectedPersonality}! <br><sub class="text-sm">coded using TypeScript, Lambda, Serverless, Sveltekit, and OpenAI's GPT-4 model \\ <a href="https://github.com/doctor-ew/drew_lab_vsk" target="_blank" rel="noopener noreferrer" class="animate-pulse hover:animate-bounce">repo</a></sub>
         </h1>
         <div class="form_holder block mb-6">
             <form class="mx-auto p-6" on:submit={handleRelayMessage}>
