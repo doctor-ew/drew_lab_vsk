@@ -1,0 +1,100 @@
+// src/config/personalities.ts
+
+export interface Personality {
+  display_name: string;
+  name: string;
+  icon: string;
+}
+
+export const personalities: Personality[] = [
+  {
+    display_name: "B. A. Barackus",
+    name: "babarackus",
+    icon: "babarackus.png",
+  },
+  { display_name: "Bob (From Dresden Files)", name: "bob", icon: "bob.png" },
+  { display_name: "Brad Boimler", name: "boimler", icon: "boimler.png" },
+  { display_name: "Beckett Mariner", name: "mariner", icon: "mariner.png" },
+  { display_name: "Brak", name: "brak", icon: "brak.png" },
+  {
+    display_name: "Captain Carol Freeman",
+    name: "captainfreeman",
+    icon: "captainfreeman.png",
+  },
+  {
+    display_name: "Cobra Commander",
+    name: "cobracommander",
+    icon: "cobracommander.png",
+  },
+  { display_name: "Lt. Data", name: "data", icon: "data.png" },
+  { display_name: "Doc Brown", name: "docbrown", icon: "docbrown.png" },
+  { display_name: "Dr. T'Ana", name: "drtana", icon: "drtana.png" },
+  { display_name: "Doctor Doom", name: "doctordoom", icon: "doctordoom.png" },
+  { display_name: "Doctor Strange", name: "drstrange", icon: "drstrange.png" },
+  { display_name: "Elizabeth Zott", name: "zott", icon: "zott.png" },
+  { display_name: "Err", name: "err", icon: "err.png" },
+  { display_name: "Frylock", name: "frylock", icon: "frylock.png" },
+  { display_name: "Gandalf", name: "gandalf", icon: "gandalf.png" },
+  { display_name: "Groot", name: "groot", icon: "groot.png" },
+  { display_name: "Hal", name: "hal", icon: "hal.png" },
+  { display_name: "Hermione Granger", name: "hermione", icon: "hermione.png" },
+  { display_name: "Iron Man", name: "ironman", icon: "ironman.png" },
+  {
+    display_name: "Capt. Jack Sparrow",
+    name: "jacksparrow",
+    icon: "jacksparrow.png",
+  },
+  { display_name: "Ignignokt", name: "ignignokt", icon: "ignignokt.png" },
+  { display_name: "K.I.T.T.", name: "kitt", icon: "kitt.png" },
+  {
+    display_name: "Master Shake",
+    name: "mastershake",
+    icon: "mastershake.png",
+  },
+  { display_name: "Meatwad", name: "meatwad", icon: "meatwad.png" },
+  { display_name: "Megatron", name: "megatron", icon: "megatron.png" },
+  { display_name: "Morty", name: "morty", icon: "morty.png" },
+  {
+    display_name: "Howling Mad Murdock (From the A-Team)",
+    name: "murdock",
+    icon: "murdock.png",
+  },
+  { display_name: "Q (from Star Trek: TNG)", name: "q", icon: "q.png" },
+  { display_name: "Qui-Gon Jin", name: "quigon", icon: "quigon.png" },
+  { display_name: "Obiwan Kenobi", name: "obiwan", icon: "obiwan.png" },
+  { display_name: "Sherlock Holmes", name: "sherlock", icon: "sherlock.png" },
+  {
+    display_name: "Rick Sanchez",
+    name: "ricksanchez",
+    icon: "ricksanchez.png",
+  },
+  { display_name: "Skeletor", name: "skeletor", icon: "skeletor.png" },
+  {
+    display_name: "Skippy The Magnificent",
+    name: "skippy",
+    icon: "skippy.png",
+  },
+  { display_name: "Space Ghost", name: "spaceghost", icon: "spaceghost.png" },
+  { display_name: "Starscream", name: "starscream", icon: "starscream.png" },
+  { display_name: "Tech (Bad Batch)", name: "tech", icon: "tech.png" },
+  { display_name: "The Eighth Doctor", name: "doctor8", icon: "doctor8.png" },
+  {
+    display_name: "The Eleventh Doctor",
+    name: "doctor11",
+    icon: "doctor11.png",
+  },
+  { display_name: "The Fifth Doctor", name: "doctor5", icon: "doctor5.png" },
+  { display_name: "The First Doctor", name: "doctor1", icon: "doctor1.png" },
+  { display_name: "The Fourth Doctor", name: "doctor4", icon: "doctor4.png" },
+  { display_name: "The Ninth Doctor", name: "doctor9", icon: "doctor9.png" },
+  { display_name: "The Second Doctor", name: "doctor2", icon: "doctor2.png" },
+  { display_name: "The Seventh Doctor", name: "doctor7", icon: "doctor7.png" },
+  { display_name: "The Sixth Doctor", name: "doctor6", icon: "doctor6.png" },
+  { display_name: "The Tenth Doctor", name: "doctor10", icon: "doctor10.png" },
+  { display_name: "The Third Doctor", name: "doctor3", icon: "doctor3.png" },
+  { display_name: "The Twelth Doctor", name: "doctor12", icon: "doctor12.png" },
+  { display_name: "Wolverine", name: "wolverine", icon: "wolverine.png" },
+  { display_name: "Wong", name: "wong", icon: "wong.png" },
+  { display_name: "Wrecker (Bad Batch)", name: "wrecker", icon: "wrecker.png" },
+  { display_name: "Zorak", name: "zorak", icon: "zorak.png" },
+];
