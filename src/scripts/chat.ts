@@ -1,5 +1,10 @@
 import { personalities } from "./personalities";
 
+// Sort the personalities list by name
+const sortedPersonalities = personalities.sort((a, b) =>
+  a.name.localeCompare(b.name)
+);
+
 export let logger: any = {};
 let message: string = "What's up, Doc?";
 let conversation: { type: string; text: string }[] = [];
@@ -7,6 +12,22 @@ export const uri: string = "https://skippyts.doctorew.com/chatbot";
 
 // Flag to prevent duplicate calls on initial load
 let isInitialLoad = true;
+
+/* ---------------- Utility Functions ---------------- */
+
+// Utility function to find personality object by name
+export const findPersonalityByName = (
+  name: string,
+  personalities: { name: string; icon: string; display_name: string }[]
+): { name: string; icon: string; display_name: string } => {
+  return (
+    personalities.find((p) => p.name === name) || {
+      name: "default",
+      display_name: "Default",
+      icon: "default-icon.png",
+    }
+  );
+};
 
 // Function to fetch message from the server with personality
 export const fetch_message = async (
@@ -63,19 +84,85 @@ export const fetch_message = async (
   }
 };
 
-// Utility function to find personality object by name
-export const findPersonalityByName = (
-  name: string,
+// Function to display messages
+export const display_message = (
+  messageType: string,
+  messageText: string,
+  display_name: string
+) => {
+  console.log(
+    "|-ct-| |-o-| display_message function called. messageType:",
+    messageType,
+    " :: messageText:",
+    messageText,
+    " :: display_name: ",
+    display_name
+  );
+  const div_chat_log = document.getElementById("chat_log");
+
+  if (!div_chat_log) {
+    console.error("chat_log element not found in the DOM.");
+    return;
+  }
+
+  let new_div = document.createElement("div");
+  let wrapper_div = document.createElement("div");
+  let new_h3 = document.createElement("h3");
+  let new_p = document.createElement("p");
+
+  new_div.classList.add(messageType);
+  new_div.classList.add(
+    "chat_log_item",
+    "flex-auto",
+    "m-0",
+    "bg-no-repeat",
+    "bg-cover",
+    "relative",
+    "h-full"
+  );
+
+  wrapper_div.classList.add(
+    "bg-white",
+    "bg-opacity-60",
+    "p-4",
+    "rounded-lg",
+    "shadow-md",
+    "w-full",
+    "h-full",
+    "flex",
+    "flex-col"
+  );
+
+  new_h3.textContent = display_name || messageType;
+  new_h3.classList.add(
+    "chat_log_item_name",
+    "text-lg",
+    "font-bold",
+    "underline",
+    "mb-2"
+  );
+
+  new_p.textContent = messageText;
+  messageType === "lowly_human"
+    ? new_p.classList.add("pl-10")
+    : new_p.classList.add("pl-6");
+  new_p.classList.add("chat_log_item_line", "w-full", "h-full");
+
+  wrapper_div.appendChild(new_h3);
+  wrapper_div.appendChild(new_p);
+  new_div.appendChild(wrapper_div);
+  div_chat_log.appendChild(new_div);
+};
+
+// Function to randomize personality
+export const randomizePersonality = (
   personalities: { name: string; icon: string; display_name: string }[]
 ): { name: string; icon: string; display_name: string } => {
-  return (
-    personalities.find((p) => p.name === name) || {
-      name: "default",
-      display_name: "Default",
-      icon: "default-icon.png",
-    }
-  );
+  const randomIndex = Math.floor(Math.random() * personalities.length);
+  return personalities[randomIndex];
 };
+
+/* ---------------- Core Functions ---------------- */
 
 // Function to handle the initial load of the application
 export const initial_load = (personality: {
@@ -125,7 +212,7 @@ export const relay_message = async (
   console.log("|-ct-| |-o-| Form submitted :: personality: ", personality);
 
   if (typeof personality === "string") {
-    personality = findPersonalityByName(personality, personalities);
+    personality = findPersonalityByName(personality, sortedPersonalities);
   }
 
   const chat_box = document.querySelector("#chat_box") as HTMLTextAreaElement;
@@ -140,7 +227,10 @@ export const relay_message = async (
     const selectedPersonality =
       personalitySelector.options[personalitySelector.selectedIndex].value;
 
-    personality = findPersonalityByName(selectedPersonality, personalities);
+    personality = findPersonalityByName(
+      selectedPersonality,
+      sortedPersonalities
+    );
 
     console.log(
       "|-ct-| |-o-| relay_message :: selectedPersonality:",
@@ -171,75 +261,8 @@ export const relay_message = async (
   }
 };
 
-// Function to display messages
-export const display_message = (
-  messageType: string,
-  messageText: string,
-  display_name: string
-) => {
-  console.log(
-    "|-ct-| |-o-| display_message function called. messageType:",
-    messageType,
-    " :: messageText:",
-    messageText,
-    " :: display_name: ",
-    display_name
-  );
-  const div_chat_log = document.getElementById("chat_log");
-
-  if (!div_chat_log) {
-    console.error("chat_log element not found in the DOM.");
-    return;
-  }
-
-  let new_div = document.createElement("div");
-  let new_h3 = document.createElement("h3");
-  let new_p = document.createElement("p");
-
-  new_div.classList.add(messageType);
-  new_div.classList.add(
-    "chat_log_item",
-    "flex-auto",
-    "m-0",
-    "bg-no-repeat",
-    "bg-white"
-  );
-  messageType === "lowly_human"
-    ? new_p.classList.add("pl-10")
-    : new_p.classList.add("pl-6");
-  new_p.classList.add(
-    "chat_log_item_line",
-    "bg-white",
-    "bg-opacity-60",
-    "p-10",
-    "w-full",
-    "h-full"
-  );
-
-  new_p.textContent = messageText;
-  //if (display_name !== "human") {
-  new_h3.textContent = display_name || messageType;
-  new_h3.classList.add(
-    "chat_log_item_name",
-    "text-lg",
-    "font-bold",
-    "underline"
-  );
-  new_div.appendChild(new_h3);
-  //}
-  new_div.appendChild(new_p);
-  div_chat_log.appendChild(new_div);
-};
-
-export const randomizePersonality = (
-  personalities: { name: string; icon: string; display_name: string }[]
-): string => {
-  const randomIndex = Math.floor(Math.random() * personalities.length);
-  return personalities[randomIndex];
-};
-
 // Ensure initial_load is called once the DOM is fully loaded
 document.addEventListener("DOMContentLoaded", () => {
   console.log("|-ct-| |-o-| DOMContentLoaded event fired. Initial load call");
-  initial_load(randomizePersonality(personalities));
+  initial_load(randomizePersonality(sortedPersonalities));
 });
