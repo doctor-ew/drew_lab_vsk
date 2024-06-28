@@ -84,6 +84,23 @@ export const fetch_message = async (
   }
 };
 
+// Function to update the h1-skippy-chat background image
+export const updateSkippyChatBackground = (personality: { name: string }) => {
+  console.log(
+    "|-ct-| |-o-| updateSkippyChatBackground function called with personality: ",
+    personality
+  );
+  const skippyChatH1 = document.querySelector(
+    ".h1-skippy-chat"
+  ) as HTMLHeadingElement;
+  if (skippyChatH1) {
+    skippyChatH1.style.backgroundImage = `url('https://www.doctorew.com/assets/gpt_personalities/${personality.name}.png')`;
+    skippyChatH1.style.backgroundSize = "contain";
+    skippyChatH1.style.backgroundRepeat = "no-repeat";
+    skippyChatH1.style.backgroundPosition = "left center";
+  }
+};
+
 // Function to display messages
 export const display_message = (
   messageType: string,
@@ -121,6 +138,13 @@ export const display_message = (
     "h-full"
   );
 
+  // Set dynamic background image
+  const bgImageUrl =
+    messageType === "lowly_human"
+      ? "https://www.doctorew.com/shuttlebay/axis_of_awesome.svg"
+      : `https://www.doctorew.com/assets/gpt_personalities/${messageType}.png`;
+  new_div.style.backgroundImage = `url('${bgImageUrl}')`;
+
   wrapper_div.classList.add(
     "bg-white",
     "bg-opacity-60",
@@ -139,8 +163,19 @@ export const display_message = (
     "text-lg",
     "font-bold",
     "underline",
-    "mb-2"
+    "mb-2",
+    "flex",
+    "items-center"
   );
+
+  // Add small version of the personality image
+  if (messageType !== "lowly_human") {
+    let img = document.createElement("img");
+    img.src = `https://www.doctorew.com/assets/gpt_personalities/${messageType}.png`;
+    img.alt = display_name || messageType;
+    img.classList.add("w-6", "h-6", "mr-2");
+    new_h3.prepend(img);
+  }
 
   new_p.textContent = messageText;
   messageType === "lowly_human"
@@ -188,6 +223,9 @@ export const initial_load = (personality: {
       personalitySelector.value = personality.name;
     }
 
+    // Update the h1-skippy-chat background image
+    updateSkippyChatBackground(personality);
+
     // Display the initial human message
     display_message("lowly_human", message, "human");
 
@@ -195,11 +233,7 @@ export const initial_load = (personality: {
     fetch_message(message, personality).then((response) => {
       console.log("|-ct-| |-o-| Initial response from Skippy:", response);
       conversation.push({ type: "skippy_the_magnificent", text: response });
-      display_message(
-        "skippy_the_magnificent",
-        response,
-        personality.display_name
-      );
+      display_message(personality.name, response, personality.display_name);
     });
   }
 };
@@ -258,6 +292,9 @@ export const relay_message = async (
     const response = await fetch_message(userMessage, personality);
     conversation.push({ type: personality.name, text: response });
     display_message(personality.name, response, personality.display_name);
+
+    // Update the h1-skippy-chat background image
+    updateSkippyChatBackground(personality);
   }
 };
 

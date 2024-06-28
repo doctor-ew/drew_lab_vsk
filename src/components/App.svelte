@@ -5,7 +5,7 @@
     import anime from 'animejs';
     import { onMount } from 'svelte';
     import { initApp } from '../scripts/appScript.ts';
-    import { relay_message, fetch_message, initial_load, randomizePersonality } from '../scripts/chat.ts';
+    import { relay_message, fetch_message, initial_load, randomizePersonality, updateSkippyChatBackground } from '../scripts/chat.ts';
     import { fetchFoxtrotCode } from '../scripts/foxtrot.ts';
     import { programmingLanguages } from '../scripts/programmingLanguages.ts';
     import { translationLanguages } from '../scripts/translationLanguages.ts';
@@ -104,6 +104,7 @@
             name: selectedOption.value,
             icon: selectedOption.dataset.icon
         };
+        updateSkippyChatBackground(selectedPersonality);
         console.log("|-AS-| |-o-| handlePersonalityChange :: Personality changed to:", selectedPersonality);
     }
 
@@ -129,9 +130,10 @@
             <h2 id="doctorew" class="mx-auto flex-grow p-10 m-0 bg-no-repeat bg-white bg-opacity-80 pl-40 font-bold text-xl">
                 <span class="block text-3xl mt-2 mb-4 underline font-black">Andrew Schillinger<sup>(He/Him)</sup></span>
                 <ul>
-                    <li class="inline">Senior Technology Executive</li>
+                    <li class="inline">Sr. Technology Executive</li>
                     <li class="inline"> ● AI Leader</li>
-                    <li class="inline"> ● CTO/Director of Emerging Technology & Innovation</li>
+                    <li class="inline"> ● CTO / Solutions Architect</li>
+                    <li class="inline"> ● Emerging Technology & Innovation</li>
                     <li class="inline"> ● Business Growth Strategy</li>
                     <li class="inline"> ● 15+ years’ experience delivering data-driven digital disruption that transforms the way people connect</li>
                 </ul>
@@ -146,7 +148,7 @@
         </div>
     </section>
     <section id="chat" class="items-center w-full m-0">
-        <h1 id="skippistan" class="mx-auto flex-auto p-10 m-0 bg-no-repeat bg-white pl-40 font-bold text-3xl">
+        <h1 id="skippistan" class="h1-skippy-chat mx-auto flex-auto p-10 m-0 bg-no-repeat bg-white pl-40 font-bold text-3xl">
             Chat with {selectedPersonality.display_name}! <br><sub class="text-sm">using TypeScript, Lambda, Serverless, Sveltekit, LangChain, and OpenAI's GPT-4 model \\ <a href="https://github.com/doctor-ew/drew_lab_vsk" target="_blank" rel="noopener noreferrer" class="animate-pulse hover:animate-bounce">repo</a></sub>
         </h1>
         <div class="form_holder block mb-6">
@@ -172,7 +174,7 @@
     </section>
     <section id="foxtrot-codex" class="items-center w-full m-0">
         <div class="cb_top_holder bg-white block">
-            <h1 id="skippistan" class="mx-auto flex-auto p-10 m-0 bg-no-repeat bg-white pl-40 font-bold text-3xl">
+            <h1 id="skippistan" class="h1-skippy-codex mx-auto flex-auto p-10 m-0 bg-no-repeat bg-white pl-40 font-bold text-3xl">
                 Write `I will not use ChatGPT to code` 500 times in {programmingLanguage}!
             </h1>
             <div class="form_holder block">
@@ -193,7 +195,7 @@
         </div>
     </section>
     <section id="translation-services" class="items-center w-full m-0">
-        <h1 id="skippy-translate" class="mx-auto flex-auto p-10 m-0 bg-no-repeat bg-white pl-40 font-bold text-3xl">
+        <h1 id="skippy-translate" class="h1-skippy-translate mx-auto flex-auto p-10 m-0 bg-no-repeat bg-white pl-40 font-bold text-3xl">
             Skippy's Translation Services
         </h1>
         <div class="translation_holder grid grid-cols-1 gap-4 flex">

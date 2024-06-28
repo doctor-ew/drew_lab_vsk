@@ -104,15 +104,21 @@ button:focus-visible {
     }
 
 
-    #skippistan /* .skippy_the_magnificent */ {
+    .h1-skippy-codex, .h1-skippy-translate /* #skippistan */  /* .skippy_the_magnificent */ {
         background-image: url(https://www.doctorew.com/shuttlebay/skippy.svg)
     }
 
     .lowly_human {
-        background-image: url(https://www.doctorew.com/shuttlebay/axis_of_awesome.svg) /* https://www.doctorew.com/shuttlebay/merry-band-of-pirates.svg */
-        
+        background-image: url(https://www.doctorew.com/shuttlebay/axis_of_awesome.svg) /* https://www.doctorew.com/shuttlebay/merry-band-of-pirates.svg */   
     }
 
+/* Media query for small devices */
+@media (max-width: 768px) {
+  .chat_log {
+    display: flex;
+    flex-direction: column;
+  }
+}
     sub,
     sup {
         font-size: 75%;
