@@ -1,47 +1,141 @@
-# Svelte + TS + Vite
+# DoctorEw's Lab Chatbot
 
-## Recommended IDE Setup
+Welcome to DoctorEw's Lab! This project is a dynamic chatbot built using TypeScript, Lambda, Serverless, Svelte, LangChain, and OpenAI's GPT-4o model. It allows users to chat with various personalities, dynamically changing the chat interface based on the selected personality.
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
+## Table of Contents
 
-## Need an official Svelte framework?
+1. [Introduction](#introduction)
+2. [Features](#features)
+3. [Installation](#installation)
+4. [Running the Project](#running-the-project)
+5. [Project Structure](#project-structure)
+6. [Understanding the Code](#understanding-the-code)
+7. [Customization](#customization)
+8. [Troubleshooting](#troubleshooting)
 
-Check out [SvelteKit](https://github.com/sveltejs/kit#readme), which is also powered by Vite. Deploy anywhere with its serverless-first approach and adapt to various platforms, with out of the box support for TypeScript, SCSS, and Less, and easily-added support for mdsvex, GraphQL, PostCSS, Tailwind CSS, and more.
+## Introduction
 
-## Technical considerations
+This project is designed to help 8th graders understand the basics of web development, TypeScript, and SvelteKit. It includes a chatbot that responds to user inputs with personality-specific replies. The chatbot interface dynamically updates based on the selected personality.
 
-**Why use this over SvelteKit?**
+## Features
 
-- It brings its own routing solution which might not be preferable for some users.
-- It is first and foremost a framework that just happens to use Vite under the hood, not a Vite app.
+- Chat with various personalities.
+- Help Jason Fox (of Foxtrot) write `I will not use ChatGPT to code` 500 times on the chalkboard
+- Ask Skippy The Magnificent (of Craig Alanson's Expeditionary Force book and audiobook series)
+- Dynamic background images based on selected personality.
+- Responsive design that adjusts to different screen sizes.
+- Built with TypeScript and Svelte.
+- Utilizes OpenAI's GPT-4o model for chatbot responses.
 
-This template contains as little as possible to get started with Vite + TypeScript + Svelte, while taking into account the developer experience with regards to HMR and intellisense. It demonstrates capabilities on par with the other `create-vite` templates and is a good starting point for beginners dipping their toes into a Vite + Svelte project.
+## Installation
 
-Should you later need the extended capabilities and extensibility provided by SvelteKit, the template has been structured similarly to SvelteKit so that it is easy to migrate.
+To get started with this project, you'll need to have Node.js and npm (Node Package Manager) installed on your computer. You can download Node.js from [here](https://nodejs.org/).
 
-**Why `global.d.ts` instead of `compilerOptions.types` inside `jsconfig.json` or `tsconfig.json`?**
+1. **Clone the Repository:**
 
-Setting `compilerOptions.types` shuts out all other types not explicitly listed in the configuration. Using triple-slash references keeps the default TypeScript setting of accepting type information from the entire workspace, while also adding `svelte` and `vite/client` type information.
+   ```sh
+   git clone https://github.com/doctor-ew/drew_lab_vsk.git
+   cd drew_lab_vsk
+   ```
 
-**Why include `.vscode/extensions.json`?**
+2. **Install Dependencies:**
 
-Other templates indirectly recommend extensions via the README, but this file allows VS Code to prompt the user to install the recommended extension upon opening the project.
+   ```sh
+   npm install
+   ```
 
-**Why enable `allowJs` in the TS template?**
+## Running the Project
 
-While `allowJs: false` would indeed prevent the use of `.js` files in the project, it does not prevent the use of JavaScript syntax in `.svelte` files. In addition, it would force `checkJs: false`, bringing the worst of both worlds: not being able to guarantee the entire codebase is TypeScript, and also having worse typechecking for the existing JavaScript. In addition, there are valid use cases in which a mixed codebase may be relevant.
+To run the project locally, follow these steps:
 
-**Why is HMR not preserving my local component state?**
+1. **Build the Project:**
 
-HMR state preservation comes with a number of gotchas! It has been disabled by default in both `svelte-hmr` and `@sveltejs/vite-plugin-svelte` due to its often surprising behavior. You can read the details [here](https://github.com/rixo/svelte-hmr#svelte-hmr).
+   ```sh
+   npm run build
+   ```
 
-If you have state that's important to retain within a component, consider creating an external store which would not be replaced by HMR.
+2. **Start the Development Server:**
 
-```ts
-// store.ts
-// An extremely simple external store
-import { writable } from 'svelte/store'
-export default writable(0)
+   ```sh
+   npm run dev
+   ```
+
+   This will start the development server and you can view the project by navigating to `http://localhost:3000` in your web browser.
+
+## Project Structure
+
+Here's a brief overview of the project's structure:
+
+```
+drew_lab_vsk/
+├── public/                      # Static assets
+│   └── assets/
+│       └── gpt_personalities/   # Personality images
+├── src/
+│   ├── lib/
+│   │   └── Counter.svelte       # Example component
+│   ├── routes/
+│   │   └── index.svelte         # Main Svelte component
+│   ├── scripts/
+│   │   ├── appScript.ts         # App initialization script
+│   │   ├── chat.ts              # Chat functionality
+│   │   ├── foxtrot.ts           # Foxtrot code fetcher
+│   │   ├── programmingLanguages.ts # Programming languages data
+│   │   ├── translationLanguages.ts # Translation languages data
+│   │   └── personalities.ts     # Personalities data
+│   └── styles/                  # CSS styles
+│       └── global.css
+├── static/                      # Static files
+├── package.json                 # Project metadata and scripts
+├── svelte.config.js             # Svelte configuration
+└── README.md                    # Project documentation
 ```
 
-* *_Footnote:_* This README was crafted with the assistance of my GPT Assistant, A.C.E. (Artificial Chat Engineer).
+## Understanding the Code
+
+### Key Files and Directories
+
+- **`public/assets/gpt_personalities/`**: Contains images for each personality.
+- **`src/scripts/chat.ts`**: Handles the chatbot functionality, including fetching responses and updating the UI.
+- **`src/routes/index.svelte`**: The main Svelte component where the chat interface is defined.
+
+### Adding a New Personality
+
+To add a new personality:
+1. Add the personality image to `public/assets/gpt_personalities/`.
+2. Update `src/scripts/personalities.ts` with the new personality's details.
+
+### Updating the Chat Background
+
+The background image of the chat header updates based on the selected personality. This is handled in the `updateSkippyChatBackground` function in `src/scripts/chat.ts`.
+
+```typescript
+export const updateSkippyChatBackground = (personality: { name: string }) => {
+  const skippyChatH1 = document.querySelector(
+    ".h1-skippy-chat"
+  ) as HTMLHeadingElement;
+  if (skippyChatH1) {
+    skippyChatH1.style.backgroundImage = `url('https://www.doctorew.com/assets/gpt_personalities/${personality.name}.png')`;
+    skippyChatH1.style.backgroundSize = 'contain';
+    skippyChatH1.style.backgroundRepeat = 'no-repeat';
+    skippyChatH1.style.backgroundPosition = 'left center';
+  }
+};
+```
+
+## Customization
+
+You can customize the project to add more features or change the existing ones. Here are some ideas:
+- Add more personalities and their corresponding images.
+- Modify the chatbot responses to make them more interactive.
+- Change the UI to make it more appealing.
+
+## Troubleshooting
+
+If you encounter any issues while running the project, try the following steps:
+- Ensure you have the latest version of Node.js and npm installed.
+- Delete the `node_modules` folder and run `npm install` again.
+- Check the browser console for any error messages and resolve them accordingly.
+
+
+This README was written by Bob (based off of Wizard Harry Dresden's sarcastic, ancient air-spirit assistant), and now my mystical ChatGPT 4o coding companion, to guide you through setting up and running the Skippy Chatbot project. Enjoy coding with a touch of sarcasm and wit!
