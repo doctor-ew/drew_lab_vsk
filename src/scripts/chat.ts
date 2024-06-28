@@ -11,7 +11,7 @@ let isInitialLoad = true;
 // Function to fetch message from the server with personality
 export const fetch_message = async (
   message: string,
-  personality: string
+  personality: { name: string; display_name: string; icon: string }
 ): Promise<string> => {
   console.log(
     "|-ct-| |-o-| fetch_message function called. Message:",
@@ -20,7 +20,7 @@ export const fetch_message = async (
     personality
   );
 
-  const sendPersonality = personality?.name || personality;
+  const sendPersonality = personality.name;
   const settings = {
     method: "POST",
     headers: {
@@ -63,8 +63,26 @@ export const fetch_message = async (
   }
 };
 
+// Utility function to find personality object by name
+export const findPersonalityByName = (
+  name: string,
+  personalities: { name: string; icon: string; display_name: string }[]
+): { name: string; icon: string; display_name: string } => {
+  return (
+    personalities.find((p) => p.name === name) || {
+      name: "default",
+      display_name: "Default",
+      icon: "default-icon.png",
+    }
+  );
+};
+
 // Function to handle the initial load of the application
-export const initial_load = (personality: string) => {
+export const initial_load = (personality: {
+  name: string;
+  icon: string;
+  display_name: string;
+}) => {
   console.log(
     "|-ct-| |-o-| initial_load function called. isInitialLoad:",
     isInitialLoad,
@@ -83,8 +101,6 @@ export const initial_load = (personality: string) => {
       personalitySelector.value = personality.name;
     }
 
-    //selectedPersonality = personality.name;
-
     // Display the initial human message
     display_message("lowly_human", message, "human");
 
@@ -102,9 +118,16 @@ export const initial_load = (personality: string) => {
 };
 
 // Function to handle user-submitted messages
-export const relay_message = async (event: Event, personality: string) => {
-  //event?.preventDefault();
+export const relay_message = async (
+  event: Event,
+  personality: string | { name: string; icon: string; display_name: string }
+) => {
   console.log("|-ct-| |-o-| Form submitted :: personality: ", personality);
+
+  if (typeof personality === "string") {
+    personality = findPersonalityByName(personality, personalities);
+  }
+
   const chat_box = document.querySelector("#chat_box") as HTMLTextAreaElement;
   const userMessage = chat_box.value.trim();
 
@@ -117,7 +140,7 @@ export const relay_message = async (event: Event, personality: string) => {
     const selectedPersonality =
       personalitySelector.options[personalitySelector.selectedIndex].value;
 
-    personality = selectedPersonality;
+    personality = findPersonalityByName(selectedPersonality, personalities);
 
     console.log(
       "|-ct-| |-o-| relay_message :: selectedPersonality:",
@@ -125,7 +148,6 @@ export const relay_message = async (event: Event, personality: string) => {
       ":: personality: ",
       personality
     );
-    //return selectedPersonality.value;
   }
 
   if (userMessage) {
@@ -144,8 +166,8 @@ export const relay_message = async (event: Event, personality: string) => {
       personality
     );
     const response = await fetch_message(userMessage, personality);
-    conversation.push({ type: personality, text: response });
-    display_message(personality, response, personality.display_name);
+    conversation.push({ type: personality.name, text: response });
+    display_message(personality.name, response, personality.display_name);
   }
 };
 
