@@ -1,9 +1,21 @@
 import { personalities } from "./personalities";
 
-// Sort the personalities list by name
-const sortedPersonalities = personalities.sort((a, b) =>
-  a.name.localeCompare(b.name)
-);
+// Group personalities by category and sort within each category
+const groupedPersonalities: { [key: string]: Personality[] } =
+  personalities.reduce((acc, personality) => {
+    const category = personality.category;
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(personality);
+    return acc;
+  }, {} as { [key: string]: Personality[] });
+
+Object.keys(groupedPersonalities).forEach((category) => {
+  groupedPersonalities[category].sort((a, b) =>
+    a.display_name.localeCompare(b.display_name)
+  );
+});
 
 export let logger: any = {};
 let message: string = "What's up, Doc?";
@@ -221,6 +233,33 @@ export const initial_load = (personality: {
     ) as HTMLSelectElement;
     if (personalitySelector) {
       personalitySelector.value = personality.name;
+
+      // Clear existing options
+      personalitySelector.innerHTML = "";
+
+      // Create option groups for each category
+      Object.keys(groupedPersonalities).forEach((category) => {
+        const optgroup = document.createElement("optgroup");
+        optgroup.label = category;
+
+        groupedPersonalities[category].forEach((personality) => {
+          const option = document.createElement("option");
+          option.value = personality.name;
+          option.text = personality.display_name;
+          optgroup.appendChild(option);
+        });
+
+        personalitySelector.appendChild(optgroup);
+      });
+
+      // Select the correct option
+      personalitySelector.value = personality.name;
+      console.log(
+        "|-ct-| |-o-| personalitySelector:",
+        personalitySelector.value,
+        " :: personality:",
+        personality.name
+      );
     }
 
     // Update the h1-skippy-chat background image
@@ -246,7 +285,7 @@ export const relay_message = async (
   console.log("|-ct-| |-o-| Form submitted :: personality: ", personality);
 
   if (typeof personality === "string") {
-    personality = findPersonalityByName(personality, sortedPersonalities);
+    personality = findPersonalityByName(personality, personalities);
   }
 
   const chat_box = document.querySelector("#chat_box") as HTMLTextAreaElement;
@@ -261,10 +300,7 @@ export const relay_message = async (
     const selectedPersonality =
       personalitySelector.options[personalitySelector.selectedIndex].value;
 
-    personality = findPersonalityByName(
-      selectedPersonality,
-      sortedPersonalities
-    );
+    personality = findPersonalityByName(selectedPersonality, personalities);
 
     console.log(
       "|-ct-| |-o-| relay_message :: selectedPersonality:",
@@ -301,5 +337,5 @@ export const relay_message = async (
 // Ensure initial_load is called once the DOM is fully loaded
 document.addEventListener("DOMContentLoaded", () => {
   console.log("|-ct-| |-o-| DOMContentLoaded event fired. Initial load call");
-  initial_load(randomizePersonality(sortedPersonalities));
+  initial_load(randomizePersonality(personalities));
 });

@@ -5,7 +5,7 @@
     import anime from 'animejs';
     import { onMount } from 'svelte';
     import { initApp } from '../scripts/appScript.ts';
-    import { relay_message, fetch_message, initial_load, randomizePersonality, updateSkippyChatBackground } from '../scripts/chat.ts';
+    import { relay_message, fetch_message, initial_load, randomizePersonality, updateSkippyChatBackground, findPersonalityByName } from '../scripts/chat.ts';
     import { fetchFoxtrotCode } from '../scripts/foxtrot.ts';
     import { programmingLanguages } from '../scripts/programmingLanguages.ts';
     import { translationLanguages } from '../scripts/translationLanguages.ts';
