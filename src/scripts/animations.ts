@@ -75,7 +75,7 @@ function handleEvent(e: any) {
         duration: Math.max(targetR / 2, minCoverDuration),
         easing: "easeOutQuart",
         complete: function () {
-            bgColor = pageFill.fill;
+            bgColor = pageFill.fill || bgColor;
             removeAnimation(fillAnimation);
         }
     });
@@ -139,9 +139,9 @@ function extend(a: any, b: any) {
 }
 
 class Circle {
-    x: number;
-    y: number;
-    r: number;
+    x = 0;
+    y = 0;
+    r = 0;
     fill?: string;
     stroke?: { width: number, color: string };
     opacity?: number;
@@ -151,6 +151,7 @@ class Circle {
     }
 
     draw() {
+        if (!ctx) return;
         ctx.globalAlpha = this.opacity || 1;
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI, false);
@@ -171,6 +172,7 @@ class Circle {
 const animate = anime({
     duration: Infinity,
     update: function () {
+        if (!ctx) return;
         ctx.fillStyle = bgColor;
         ctx.fillRect(0, 0, cW, cH);
         animations.forEach(function (anim) {
@@ -184,6 +186,7 @@ const animate = anime({
 export const resizeCanvas = () => {
     cW = window.innerWidth;
     cH = window.innerHeight;
+    if (!c || !ctx) return;
     c.width = cW * devicePixelRatio;
     c.height = cH * devicePixelRatio;
     ctx.scale(devicePixelRatio, devicePixelRatio);

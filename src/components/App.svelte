@@ -1,121 +1,60 @@
 <script lang="ts">
-    import svelteLogo from '../../public/svelte.svg';
-    import viteLogo from '/vite.svg';
-    import Counter from '../lib/Counter.svelte';
-    import anime from 'animejs';
-    import { onMount } from 'svelte';
-    import { initApp } from '../scripts/appScript.ts';
-    import { relay_message, fetch_message, initial_load, randomizePersonality, updateSkippyChatBackground } from '../scripts/chat.ts';
-    import { fetchFoxtrotCode } from '../scripts/foxtrot.ts';
-    import { programmingLanguages } from '../scripts/programmingLanguages.ts';
-    import { translationLanguages } from '../scripts/translationLanguages.ts';
-    import { personalities } from '../scripts/personalities.ts';
+    import { onMount, onDestroy } from 'svelte';
+    import { initApp } from '../scripts/appScript';
+    import { randomizePersonality, updateSkippyChatBackground } from '../scripts/chat';
+    import { programmingLanguages } from '../scripts/programmingLanguages';
+    import { translationLanguages } from '../scripts/translationLanguages';
+    import { personalities } from '../scripts/personalities';
+    import { createAiClient, type AiAction } from '../scripts/aiClient';
+    import { verifyTurnstile } from '../scripts/turnstile';
 
-    let canvasElement;
-    let foxtrotCode = "";
-    let programmingLanguage = "";
-    let isLoading = false;
-    let languageSelector: HTMLSelectElement;
-    let translationLanguageSelector: HTMLSelectElement;
-    let translationText = "Hello World";
-    let translatedText = "";
+    const siteKey = (import.meta.env.VITE_TURNSTILE_SITE_KEY || '').trim();
+    const lifetime = new AbortController();
+    const request = createAiClient((action, signal) => verifyTurnstile(siteKey, action, signal));
+    let canvasElement: HTMLCanvasElement;
+    let foxtrotCode = '';
+    let programmingLanguage = programmingLanguages[0];
+    let translationLanguage = translationLanguages[0].code;
+    let translationText = 'Hello World';
+    let translatedText = '';
+    let chatText = '';
     let selectedPersonality = randomizePersonality(personalities);
-    let personalitySelector: HTMLSelectElement;
-    let conversation = [];
+    let personalityName = selectedPersonality.name;
+    let conversation: { type: string; text: string }[] = [];
+    let pending: Record<AiAction, boolean> = { chatbot: false, translation: false, foxtrot: false };
+    let errors: Record<AiAction, string> = { chatbot: '', translation: '', foxtrot: '' };
+    onMount(() => { initApp(); updateSkippyChatBackground(selectedPersonality); });
+    onDestroy(() => lifetime.abort());
 
-    onMount(() => {
-        initApp(canvasElement);
-        initial_load(selectedPersonality);
-        refreshFoxtrotCode();
-        randomizeTranslation();
-    });
-
-    async function refreshFoxtrotCode(language = "") {
-        isLoading = true;
-        try {
-            const result = await fetchFoxtrotCode(language);
-            programmingLanguage = result.language;
-            foxtrotCode = result.code;
-            setLanguageSelector(result.language);
-        } catch (error) {
-            console.error("Error fetching Foxtrot code:", error);
-            foxtrotCode = `${programmingLanguage} fried Skippy's circuits`;
-        } finally {
-            isLoading = false;
-        }
+    async function run(action: AiAction, payload: Record<string, string>, done: (answer: string) => void) {
+        if (pending[action]) return;
+        pending = { ...pending, [action]: true };
+        errors = { ...errors, [action]: '' };
+        try { done(await request(action, payload, lifetime.signal)); }
+        catch (error) { errors = { ...errors, [action]: error instanceof Error ? error.message : 'Request failed. Please try again.' }; }
+        finally { pending = { ...pending, [action]: false }; }
     }
-
-    function handleLanguageChange(event) {
-        const selectedLanguage = event.target.value;
-        refreshFoxtrotCode(selectedLanguage);
-        handleTranslate();
-    }
-
-    function handleRandomButtonClick() {
-        const randomLanguage = programmingLanguages[Math.floor(Math.random() * programmingLanguages.length)];
-        refreshFoxtrotCode(randomLanguage);
-    }
-
-    function setLanguageSelector(language) {
-        if (languageSelector) {
-            languageSelector.value = language;
-        }
-    }
-
-    function randomizeTranslation() {
-        const randomLanguage = translationLanguages[Math.floor(Math.random() * translationLanguages.length)];
-        translationLanguageSelector.value = randomLanguage.code;
-        handleTranslate();
-    }
-
-    async function handleTranslate() {
-        isLoading = true;
-        try {
-            const response = await fetch('https://skippyts.doctorew.com/translation', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    question: `Translate: ${translationText}`,
-                    language: translationLanguageSelector.value,
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-
-            const result = await response.json();
-            translatedText = result.answer;
-            console.log("|-AS-| |-o-| Translate! [[",translatedText,"]] Result:",result);
-        } catch (error) {
-            console.error("Error translating text:", error);
-            translatedText = "Translation failed.";
-        } finally {
-            isLoading = false;
-        }
-    }
-
-    function handlePersonalityChange(event) {
-        const selectedOption = event.target.options[event.target.selectedIndex];
-        selectedPersonality = {
-            display_name: selectedOption.text,
-            name: selectedOption.value,
-            icon: selectedOption.dataset.icon
-        };
+    function handlePersonalityChange() {
+        selectedPersonality = personalities.find(p => p.name === personalityName) || personalities[0];
         updateSkippyChatBackground(selectedPersonality);
-        console.log("|-AS-| |-o-| handlePersonalityChange :: Personality changed to:", selectedPersonality);
     }
-
-    function handleRelayMessage(event) {
-
-        console.log("|-AS-| |-o-| handleRelayMessage:", event, " :: selectedPersonality: ",selectedPersonality);
-        const chatBox = document.querySelector("#chat_box") as HTMLTextAreaElement;
-        const userMessage = chatBox.value.trim();
-        if (userMessage) {
-            relay_message(userMessage, selectedPersonality.name);
-        }
+    function handleRelayMessage() {
+        const question = chatText.trim();
+        if (!question || pending.chatbot) return;
+        const name = selectedPersonality.display_name;
+        void run('chatbot', { question, personality: selectedPersonality.name }, answer => {
+            conversation = [...conversation, { type: 'You', text: question }, { type: name, text: answer }];
+            chatText = '';
+        });
+    }
+    function refreshFoxtrotCode() {
+        void run('foxtrot', { programmingLanguage }, answer => { foxtrotCode = answer.replace(/```[a-z]*\n|```/g, ''); });
+    }
+    function handleRandomButtonClick() { programmingLanguage = programmingLanguages[Math.floor(Math.random() * programmingLanguages.length)]; }
+    function randomizeTranslation() { translationLanguage = translationLanguages[Math.floor(Math.random() * translationLanguages.length)].code; }
+    function handleTranslate() {
+        if (!translationText.trim()) return;
+        void run('translation', { question: translationText, language: translationLanguage }, answer => { translatedText = answer; });
     }
 </script>
 
@@ -143,30 +82,32 @@
                 <a href="https://github.com/doctor-ew/" target="_blank" rel="noopener noreferrer" class="animate-pulse hover:animate-bounce">github</a> \\ 
                 <a href="https://www.doctorew.com/Andrew_Schillinger_resume_engineering.pdf" target="_blank" rel="noopener noreferrer" class="animate-pulse hover:animate-bounce">resume</a> \\ 
                 <a href="https://www.doctorew.medium.com/" target="_blank" rel="noopener noreferrer" class="animate-pulse hover:animate-bounce">blog</a> \\ 
-                <a href="javascript:void(0);" rel="noopener noreferrer" class="animate-pulse hover:animate-bounce">drew[at]doctorew[dot]com</a>
+                <span>drew[at]doctorew[dot]com</span>
             </h3>
         </div>
     </section>
+    {#if !siteKey}<p role="status" class="p-6 bg-white">AI demos are temporarily unavailable while human verification is configured. The rest of the portfolio remains available.</p>{/if}
     <section id="chat" class="items-center w-full m-0">
         <h1 id="skippistan" class="h1-skippy-chat mx-auto flex-auto p-10 m-0 bg-no-repeat bg-white pl-40 font-bold text-3xl">
             Chat with {selectedPersonality.display_name}! <br><sub class="text-sm">using TypeScript, Lambda, Serverless, Sveltekit, LangChain, and OpenAI's GPT-4 model \\ <a href="https://github.com/doctor-ew/drew_lab_vsk" target="_blank" rel="noopener noreferrer" class="animate-pulse hover:animate-bounce">repo</a></sub>
         </h1>
         <div class="form_holder block mb-6">
-            <form class="mx-auto p-6" on:submit={handleRelayMessage}>
+            <form class="mx-auto p-6" on:submit|preventDefault={handleRelayMessage}>
                 <label for="chat_box" class="active"></label>
-                <textarea id="chat_box" class="textarea w-full text-gray-200" name="chat_box" placeholder="Chat with {selectedPersonality.display_name}!" required=""></textarea>
-                <select id="personality_selector" bind:this={personalitySelector} on:change={handlePersonalityChange}>
+                <textarea id="chat_box" class="textarea w-full text-gray-200" name="chat_box" bind:value={chatText} maxlength="4000" disabled={pending.chatbot || !siteKey} placeholder="Chat with {selectedPersonality.display_name}!" required></textarea>
+                <select id="personality_selector" bind:value={personalityName} disabled={pending.chatbot} on:change={handlePersonalityChange}>
                     {#each personalities as personality}
                     <option value={personality.name} data-icon={personality.icon}>{personality.display_name}</option>
                     {/each}
                 </select>
-                <button type="submit" name="submit" class="submit" id="chat_submit">Submit</button>
+                <button type="submit" name="submit" class="submit" id="chat_submit" disabled={pending.chatbot || !siteKey}>{pending.chatbot ? "Verifying / sending…" : "Submit"}</button>
             </form>
         </div>
+        <div id="turnstile-chatbot"></div>
+        {#if errors.chatbot}<p role="alert" class="p-4 bg-white">{errors.chatbot}</p>{/if}
         <div id="chat_log" class="chat_log grid grid-cols-2 gap-4 flex">
             {#each conversation as chat}
             <div class="{chat.type}">
-                <img src={`/icons/${chat.type}.png`} alt={chat.type} class="chat_icon" />
                 <p><strong><u>{chat.type}</u></strong>: {chat.text}</p>
             </div>
             {/each}
@@ -179,19 +120,22 @@
             </h1>
             <div class="form_holder block">
                 <label for="language_selector">Select Language:</label>
-                <select id="language_selector" bind:this={languageSelector} on:change={handleLanguageChange}>
+                <select id="language_selector" bind:value={programmingLanguage} disabled={pending.foxtrot}>
                     {#each programmingLanguages as language}
                     <option value={language}>{language}</option>
                     {/each}
                 </select>
-                <button on:click={handleRandomButtonClick}>Random</button>
+                <button type="button" disabled={pending.foxtrot} on:click={handleRandomButtonClick}>Random language</button>
+                <button type="button" disabled={pending.foxtrot || !siteKey} on:click={refreshFoxtrotCode}>Generate code</button>
             </div>
         </div>
+        <div id="turnstile-foxtrot"></div>
+        {#if errors.foxtrot}<p role="alert" class="p-4 bg-white">{errors.foxtrot}</p>{/if}
         <div class="chalkboard grid grid-cols-1 gap-4 flex">
-            {#if isLoading}
+            {#if pending.foxtrot}
                 <div class="loader"></div>
             {/if}
-            <pre class="code-output" class:is-hidden={isLoading}>{foxtrotCode}</pre>
+            <pre class="code-output" class:is-hidden={pending.foxtrot}>{foxtrotCode}</pre>
         </div>
     </section>
     <section id="translation-services" class="items-center w-full m-0">
@@ -202,18 +146,20 @@
             <div class="form_holder block mb-6">
                 <form class="mx-auto p-6" on:submit|preventDefault={handleTranslate}>
                     <label for="translation_box" class="active"></label>
-                    <textarea id="translation_box" class="textarea w-full text-gray-200" bind:value={translationText} name="translation_box" placeholder="Enter text to translate..." required=""></textarea>
+                    <textarea id="translation_box" class="textarea w-full text-gray-200" bind:value={translationText} maxlength="4000" disabled={pending.translation || !siteKey} name="translation_box" placeholder="Enter text to translate..." required></textarea>
                     <div class="flex items-center mt-4">
-                        <select id="translation_language_selector" bind:this={translationLanguageSelector} on:change={handleTranslate}>
+                        <select id="translation_language_selector" bind:value={translationLanguage} disabled={pending.translation}>
                             {#each translationLanguages as language}
                             <option value={language.code}>{language.name}</option>
                             {/each}
                         </select>
-                        <button type="submit" name="submit" class="submit ml-4" id="translate_submit">Translate</button>
-                        <button type="button" name="random" class="submit ml-4" on:click={randomizeTranslation}>Random</button>
+                        <button type="submit" name="submit" class="submit ml-4" id="translate_submit" disabled={pending.translation || !siteKey}>{pending.translation ? "Verifying / translating…" : "Translate"}</button>
+                        <button type="button" name="random" class="submit ml-4" disabled={pending.translation} on:click={randomizeTranslation}>Random language</button>
                     </div>
                 </form>
             </div>
+        <div id="turnstile-translation"></div>
+        {#if errors.translation}<p role="alert" class="p-4 bg-white">{errors.translation}</p>{/if}
             {#if translatedText}
                 <pre id="translated_text" class="translated_text w-full p-6 bg-white bg-opacity-80 whitespace-pre-wrap">
                     {translatedText}
