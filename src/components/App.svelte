@@ -1,16 +1,16 @@
 <script lang="ts">
-    import { onMount, onDestroy } from 'svelte';
+    import { onMount, onDestroy, tick } from 'svelte';
     import { initApp } from '../scripts/appScript';
     import { randomizePersonality, updateSkippyChatBackground } from '../scripts/chat';
     import { programmingLanguages } from '../scripts/programmingLanguages';
     import { translationLanguages } from '../scripts/translationLanguages';
     import { personalities } from '../scripts/personalities';
-    import { createAiClient, type AiAction } from '../scripts/aiClient';
+    import { createAiClient, type AiAction, type AiRequestPhase } from '../scripts/aiClient';
     import { verifyTurnstile } from '../scripts/turnstile';
 
     const siteKey = (import.meta.env.VITE_TURNSTILE_SITE_KEY || '').trim();
     const lifetime = new AbortController();
-    const request = createAiClient((action, signal) => verifyTurnstile(siteKey, action, signal));
+    const request = createAiClient((action, signal) => verifyTurnstile(siteKey, action, signal), fetch, 45000, (action, phase) => { phases = { ...phases, [action]: phase }; });
     let canvasElement: HTMLCanvasElement;
     let foxtrotCode = '';
     let programmingLanguage = programmingLanguages[0];
@@ -22,6 +22,8 @@
     let personalityName = selectedPersonality.name;
     let conversation: { type: string; text: string }[] = [];
     let pending: Record<AiAction, boolean> = { chatbot: false, translation: false, foxtrot: false };
+    let phases: Record<AiAction, AiRequestPhase | null> = { chatbot: null, translation: null, foxtrot: null };
+    let completed: Record<AiAction, boolean> = { chatbot: false, translation: false, foxtrot: false };
     let errors: Record<AiAction, string> = { chatbot: '', translation: '', foxtrot: '' };
     onMount(() => { initApp(); updateSkippyChatBackground(selectedPersonality); });
     onDestroy(() => lifetime.abort());
@@ -30,9 +32,22 @@
         if (pending[action]) return;
         pending = { ...pending, [action]: true };
         errors = { ...errors, [action]: '' };
-        try { done(await request(action, payload, lifetime.signal)); }
-        catch (error) { errors = { ...errors, [action]: error instanceof Error ? error.message : 'Request failed. Please try again.' }; }
-        finally { pending = { ...pending, [action]: false }; }
+        phases = { ...phases, [action]: 'verifying' };
+        completed = { ...completed, [action]: false };
+        await tick();
+        document.getElementById(`ai-feedback-${action}`)?.scrollIntoView({ block: 'nearest' });
+        try {
+            done(await request(action, payload, lifetime.signal));
+            completed = { ...completed, [action]: true };
+        } catch (error) {
+            errors = { ...errors, [action]: error instanceof Error ? error.message : 'Request failed. Please try again.' };
+            await tick();
+            const feedback = document.getElementById(`ai-feedback-${action}`);
+            if (feedback?.closest('section')?.contains(document.activeElement) || document.activeElement === document.body) document.getElementById(`ai-error-${action}`)?.focus();
+        } finally {
+            pending = { ...pending, [action]: false };
+            phases = { ...phases, [action]: null };
+        }
     }
     function handlePersonalityChange() {
         selectedPersonality = personalities.find(p => p.name === personalityName) || personalities[0];
@@ -89,22 +104,26 @@
     {#if !siteKey}<p role="status" class="p-6 bg-white">AI demos are temporarily unavailable while human verification is configured. The rest of the portfolio remains available.</p>{/if}
     <section id="chat" class="items-center w-full m-0">
         <h1 id="skippistan" class="h1-skippy-chat mx-auto flex-auto p-10 m-0 bg-no-repeat bg-white pl-40 font-bold text-3xl">
-            Chat with {selectedPersonality.display_name}! <br><sub class="text-sm">using TypeScript, Lambda, Serverless, Sveltekit, LangChain, and OpenAI's GPT-4 model \\ <a href="https://github.com/doctor-ew/drew_lab_vsk" target="_blank" rel="noopener noreferrer" class="animate-pulse hover:animate-bounce">repo</a></sub>
+            Chat with {selectedPersonality.display_name}! <br><sub class="text-sm">using TypeScript, Lambda, Serverless, Sveltekit, LangChain, and OpenAI \\ <a href="https://github.com/doctor-ew/drew_lab_vsk" target="_blank" rel="noopener noreferrer" class="animate-pulse hover:animate-bounce">repo</a></sub>
         </h1>
         <div class="form_holder block mb-6">
             <form class="mx-auto p-6" on:submit|preventDefault={handleRelayMessage}>
-                <label for="chat_box" class="active"></label>
-                <textarea id="chat_box" class="textarea w-full text-gray-200" name="chat_box" bind:value={chatText} maxlength="4000" disabled={pending.chatbot || !siteKey} placeholder="Chat with {selectedPersonality.display_name}!" required></textarea>
+                <label for="chat_box" class="active">Your message</label>
+                <p id="chatbot-help" class="ai-help">Type a message, choose a personality, then click Submit. Complete the verification below if prompted. Changing the personality does not send a message.</p>
+                <textarea id="chat_box" aria-describedby="chatbot-help" class="textarea w-full ai-input" name="chat_box" bind:value={chatText} maxlength="4000" disabled={pending.chatbot || !siteKey} placeholder="Chat with {selectedPersonality.display_name}!" required></textarea>
                 <select id="personality_selector" bind:value={personalityName} disabled={pending.chatbot} on:change={handlePersonalityChange}>
                     {#each personalities as personality}
                     <option value={personality.name} data-icon={personality.icon}>{personality.display_name}</option>
                     {/each}
                 </select>
-                <button type="submit" name="submit" class="submit" id="chat_submit" disabled={pending.chatbot || !siteKey}>{pending.chatbot ? "Verifying / sending…" : "Submit"}</button>
+                <button type="submit" name="submit" class="submit" id="chat_submit" disabled={pending.chatbot || !siteKey}>{pending.chatbot ? phases.chatbot === "requesting" ? "Waiting for AI…" : "Verifying…" : "Submit"}</button>
+                <div id="ai-feedback-chatbot" class="ai-feedback">
+                    <p id="ai-status-chatbot" role="status" aria-live="polite" aria-atomic="true" class="ai-status">{phases.chatbot === 'verifying' ? 'Checking your browser. Complete verification below if prompted.' : phases.chatbot === 'requesting' ? 'Waiting for AI response…' : completed.chatbot ? 'Response ready below.' : ''}</p>
+                    <div id="turnstile-chatbot" class="verification-widget"></div>
+                    {#if errors.chatbot}<p id="ai-error-chatbot" role="alert" tabindex="-1" class="ai-error">{errors.chatbot}</p>{/if}
+                </div>
             </form>
         </div>
-        <div id="turnstile-chatbot"></div>
-        {#if errors.chatbot}<p role="alert" class="p-4 bg-white">{errors.chatbot}</p>{/if}
         <div id="chat_log" class="chat_log grid grid-cols-2 gap-4 flex">
             {#each conversation as chat}
             <div class="{chat.type}">
@@ -119,18 +138,22 @@
                 Write `I will not use ChatGPT to code` 500 times in {programmingLanguage}!
             </h1>
             <div class="form_holder block">
+                <p id="foxtrot-help" class="ai-help">Choose a language, then click Generate code. Random language only changes your selection. Complete the verification below if prompted.</p>
                 <label for="language_selector">Select Language:</label>
-                <select id="language_selector" bind:value={programmingLanguage} disabled={pending.foxtrot}>
+                <select id="language_selector" aria-describedby="foxtrot-help" bind:value={programmingLanguage} disabled={pending.foxtrot}>
                     {#each programmingLanguages as language}
                     <option value={language}>{language}</option>
                     {/each}
                 </select>
                 <button type="button" disabled={pending.foxtrot} on:click={handleRandomButtonClick}>Random language</button>
-                <button type="button" disabled={pending.foxtrot || !siteKey} on:click={refreshFoxtrotCode}>Generate code</button>
+                <button type="button" disabled={pending.foxtrot || !siteKey} on:click={refreshFoxtrotCode}>{pending.foxtrot ? phases.foxtrot === "requesting" ? "Waiting for AI…" : "Verifying…" : "Generate code"}</button>
+                <div id="ai-feedback-foxtrot" class="ai-feedback">
+                    <p id="ai-status-foxtrot" role="status" aria-live="polite" aria-atomic="true" class="ai-status">{phases.foxtrot === 'verifying' ? 'Checking your browser. Complete verification below if prompted.' : phases.foxtrot === 'requesting' ? 'Waiting for AI response…' : completed.foxtrot ? 'Response ready below.' : ''}</p>
+                    <div id="turnstile-foxtrot" class="verification-widget"></div>
+                    {#if errors.foxtrot}<p id="ai-error-foxtrot" role="alert" tabindex="-1" class="ai-error">{errors.foxtrot}</p>{/if}
+                </div>
             </div>
         </div>
-        <div id="turnstile-foxtrot"></div>
-        {#if errors.foxtrot}<p role="alert" class="p-4 bg-white">{errors.foxtrot}</p>{/if}
         <div class="chalkboard grid grid-cols-1 gap-4 flex">
             {#if pending.foxtrot}
                 <div class="loader"></div>
@@ -145,21 +168,25 @@
         <div class="translation_holder grid grid-cols-1 gap-4 flex">
             <div class="form_holder block mb-6">
                 <form class="mx-auto p-6" on:submit|preventDefault={handleTranslate}>
-                    <label for="translation_box" class="active"></label>
-                    <textarea id="translation_box" class="textarea w-full text-gray-200" bind:value={translationText} maxlength="4000" disabled={pending.translation || !siteKey} name="translation_box" placeholder="Enter text to translate..." required></textarea>
+                    <label for="translation_box" class="active">Text to translate</label>
+                    <p id="translation-help" class="ai-help">Enter text, choose a language, then click Translate. Random language only changes your selection. Complete the verification below if prompted.</p>
+                    <textarea id="translation_box" aria-describedby="translation-help" class="textarea w-full ai-input" bind:value={translationText} maxlength="4000" disabled={pending.translation || !siteKey} name="translation_box" placeholder="Enter text to translate..." required></textarea>
                     <div class="flex items-center mt-4">
                         <select id="translation_language_selector" bind:value={translationLanguage} disabled={pending.translation}>
                             {#each translationLanguages as language}
                             <option value={language.code}>{language.name}</option>
                             {/each}
                         </select>
-                        <button type="submit" name="submit" class="submit ml-4" id="translate_submit" disabled={pending.translation || !siteKey}>{pending.translation ? "Verifying / translating…" : "Translate"}</button>
+                        <button type="submit" name="submit" class="submit ml-4" id="translate_submit" disabled={pending.translation || !siteKey}>{pending.translation ? phases.translation === "requesting" ? "Waiting for AI…" : "Verifying…" : "Translate"}</button>
                         <button type="button" name="random" class="submit ml-4" disabled={pending.translation} on:click={randomizeTranslation}>Random language</button>
                     </div>
+                    <div id="ai-feedback-translation" class="ai-feedback">
+                    <p id="ai-status-translation" role="status" aria-live="polite" aria-atomic="true" class="ai-status">{phases.translation === 'verifying' ? 'Checking your browser. Complete verification below if prompted.' : phases.translation === 'requesting' ? 'Waiting for AI response…' : completed.translation ? 'Response ready below.' : ''}</p>
+                    <div id="turnstile-translation" class="verification-widget"></div>
+                    {#if errors.translation}<p id="ai-error-translation" role="alert" tabindex="-1" class="ai-error">{errors.translation}</p>{/if}
+                </div>
                 </form>
             </div>
-        <div id="turnstile-translation"></div>
-        {#if errors.translation}<p role="alert" class="p-4 bg-white">{errors.translation}</p>{/if}
             {#if translatedText}
                 <pre id="translated_text" class="translated_text w-full p-6 bg-white bg-opacity-80 whitespace-pre-wrap">
                     {translatedText}
@@ -170,6 +197,17 @@
 </main>
 
 <style>
+    .ai-help { max-width: calc(100vw - 48px); box-sizing: border-box; color: #243044; background: #fffdf5; padding: 12px; border-left: 4px solid #cf8b24; margin: 10px 0 14px; font: 400 15px/1.5 system-ui, sans-serif; text-align: left; }
+    .ai-input { max-width: calc(100vw - 48px); box-sizing: border-box; color: #182130; background: #fff; border: 1px solid #687486; opacity: 1; -webkit-text-fill-color: #182130; }
+    .ai-input::placeholder { color: #596579; opacity: 1; }
+    .ai-input:disabled { background: #edf0f4; color: #364152; -webkit-text-fill-color: #364152; opacity: 1; }
+    .ai-feedback { max-width: calc(100vw - 48px); box-sizing: border-box; clear: both; width: 100%; margin: 12px 0 0; scroll-margin-block: 24px; }
+    .ai-status { color: #182130; background: #fff; font: 600 15px/1.5 system-ui, sans-serif; text-align: left; }
+    .ai-status:not(:empty) { padding: 12px; border-left: 4px solid #30748a; margin: 0 0 10px; }
+    .verification-widget { max-width: 100%; overflow-x: auto; }
+    .ai-error { color: #752323; background: #fff4f2; border: 2px solid #a83b31; padding: 12px; margin: 10px 0 0; font: 600 15px/1.5 system-ui, sans-serif; text-align: left; overflow-wrap: anywhere; }
+    .ai-error:focus { outline: 3px solid #243044; outline-offset: 3px; }
+
     .logo {
         height: 6em;
         padding: 1.5em;

@@ -17,3 +17,9 @@ The browser limits text to 4,000 characters, prevents duplicate requests per act
 ## Validation
 
 Run `npm run check`, `npm run build`, and `npm test -- --runInBand`. Mocked tests never call the deployed AI endpoints. Verify the real widget with an approved hostname after configuring server-side verification; production keys and live model requests are not part of automated tests.
+
+## Request feedback
+
+Each demo explains its explicit action: Submit for chat, Generate code for the coding demo, or Translate for translation. Changing a personality or language does not submit a request. Human verification appears beside the action that triggered it. The status distinguishes browser verification from waiting for the AI response; completed responses remain below the form. Input and status text use explicit readable foreground/background colors.
+
+Rejected requests display the backend's generic public error when it is a printable, non-markup string of at most 240 characters; malformed or non-JSON errors use a fixed fallback. Messages are rendered as text. A visible error receives focus when the user is still in the originating section, without moving focus away from another section.

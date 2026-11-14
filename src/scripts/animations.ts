@@ -47,13 +47,13 @@ const calcPageFillRadius = (x: number, y: number) => {
 };
 
 export const addClickListeners = () => {
-    document.addEventListener("touchstart", handleEvent);
+    document.addEventListener("touchstart", handleEvent, { passive: true });
     document.addEventListener("mousedown", handleEvent);
 };
 
 function handleEvent(e: any) {
+    if (e.target instanceof Element && e.target.closest('button, input, textarea, select, a, form, [contenteditable], .ai-feedback')) return;
     if (e.touches) {
-        e.preventDefault();
         e = e.touches[0];
     }
     const currentColor = colorPicker.current();

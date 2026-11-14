@@ -63,3 +63,39 @@ test('Turnstile uses explicit execution, route action and cleans up its widget',
   expect(api.remove).toHaveBeenCalledWith('widget');
   delete (globalThis as unknown as { window?: unknown }).window;
 });
+
+test('request phases distinguish pending human verification from the AI response', async () => {
+  let verify!: (token: string) => void;
+  let respond!: (value: Response) => void;
+  const phases: string[] = [];
+  const request = createAiClient(() => new Promise(resolve => { verify = resolve; }), () => new Promise(resolve => { respond = resolve; }), 45000, (action, phase) => phases.push(`${action}:${phase}`));
+  const result = request('chatbot', { question: 'Hi' }, signal());
+  expect(phases).toEqual(['chatbot:verifying']);
+  verify('token');
+  await Promise.resolve();
+  expect(phases).toEqual(['chatbot:verifying', 'chatbot:requesting']);
+  respond(success());
+  await result;
+});
+
+test('verification rejection never reports an AI request phase', async () => {
+  const phases: string[] = [], fetcher = jest.fn();
+  const request = createAiClient(async () => { throw Error('Verification was not completed.'); }, fetcher, 45000, (_action, phase) => phases.push(phase));
+  await expect(request('chatbot', { question: 'Hi' }, signal())).rejects.toThrow('Verification');
+  expect(phases).toEqual(['verifying']);
+  expect(fetcher).not.toHaveBeenCalled();
+});
+
+test('safe bounded backend messages remain visible; malformed messages use a fallback', async () => {
+  for (const [error, expected] of [
+    ['Please complete the verification and try again.', 'Please complete the verification and try again.'],
+    ['x'.repeat(241), 'Request could not be completed.'],
+    ['<script>unsafe()</script>', 'Request could not be completed.'],
+    [42, 'Request could not be completed.'],
+  ]) {
+    const fetcher = jest.fn().mockResolvedValue({ok: false, status: 403, json: async () => ({error})});
+    await expect(createAiClient(async () => 'token', fetcher)('chatbot', {question:'Hi'}, signal())).rejects.toThrow(expected as string);
+  }
+  const unavailable = jest.fn().mockResolvedValue({ok:false,status:429,json:async()=>{throw Error('HTML gateway response');}});
+  await expect(createAiClient(async () => 'token', unavailable)('chatbot', {question:'Hi'}, signal())).rejects.toThrow('Demo limit reached.');
+});

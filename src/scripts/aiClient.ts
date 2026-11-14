@@ -1,11 +1,12 @@
 export type AiAction = 'chatbot' | 'translation' | 'foxtrot';
+export type AiRequestPhase = 'verifying' | 'requesting';
 type Verify = (action: AiAction, signal: AbortSignal) => Promise<string>;
 const routes: Record<AiAction, string> = {
   chatbot: 'https://skippyts.doctorew.com/chatbot',
   translation: 'https://skippyts.doctorew.com/translation',
   foxtrot: 'https://skippyts.doctorew.com/foxtrot',
 };
-export function createAiClient(verify: Verify, fetcher: typeof fetch = fetch, timeoutMs = 45000) {
+export function createAiClient(verify: Verify, fetcher: typeof fetch = fetch, timeoutMs = 45000, onPhase: (action: AiAction, phase: AiRequestPhase) => void = () => {}) {
   const pending = new Set<AiAction>();
   return async (action: AiAction, payload: Record<string, string>, signal: AbortSignal): Promise<string> => {
     if (pending.has(action)) throw new Error('This request is already in progress.');
@@ -19,14 +20,25 @@ export function createAiClient(verify: Verify, fetcher: typeof fetch = fetch, ti
     let timer: ReturnType<typeof setTimeout> | undefined;
     try {
       if (signal.aborted) throw new Error('Request cancelled.');
+      onPhase(action, 'verifying');
       const turnstileToken = await verify(action, controller.signal);
       if (!turnstileToken || controller.signal.aborted) throw new Error('Human verification was not completed.');
+      onPhase(action, 'requesting');
       timer = setTimeout(abort, timeoutMs);
       const response = await fetcher(routes[action], {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...payload, turnstileToken }), signal: controller.signal,
       });
-      if (!response.ok) throw new Error(response.status === 429 ? 'Demo limit reached. Please try again later.' : 'Request could not be completed. Please try again.');
+      if (!response.ok) {
+        const fallback = response.status === 429 ? 'Demo limit reached. Please try again later.' : 'Request could not be completed. Please try again.';
+        let message = fallback;
+        try {
+          const body = await response.json();
+          const candidate = typeof body?.error === 'string' ? body.error.trim() : '';
+          if (candidate && candidate.length <= 240 && !/[<>\u0000-\u001f]/.test(candidate)) message = candidate;
+        } catch { /* Non-JSON gateway errors use the safe fallback. */ }
+        throw new Error(message);
+      }
       const data = await response.json();
       if (typeof data.answer !== 'string') throw new Error('The service returned an invalid response.');
       return data.answer;
