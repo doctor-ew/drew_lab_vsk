@@ -1,1 +1,7 @@
+/* src/styles/main.css */
 @import url('https://fonts.googleapis.com/css?family=Source+Code+Pro&display=swap');
+@import './base.min.css';
+@import './components.min.css';
+@import './utilities.min.css';
+@import './custom-forms.min.css';
+@import './full.css';
