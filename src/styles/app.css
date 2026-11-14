@@ -165,3 +165,24 @@ button:focus-visible {
     }
 
 }
+
+/* Keep the original page layout; readable dialogue must not depend on the canvas color. */
+#chat_log > div {
+    color: #010f66;
+    background: #fffaf2;
+    padding: 1.25rem;
+    text-align: left;
+    line-height: 1.65;
+    overflow-wrap: anywhere;
+    min-width: 0;
+}
+#chat_log p { margin: 0; white-space: pre-wrap; }
+#chat_box, #translation_box {
+    background: #1d252d;
+    color: #f3f4f6;
+    opacity: 1;
+}
+#chat_box::placeholder, #translation_box::placeholder { color: #c4ccd5; opacity: 1; }
+#personality_selector, #translation_language_selector { color: #010f66; opacity: 1; }
+#chat_submit, #translate_submit { color: #010f66; }
+#translated_text { color: #010f66; background: #fffaf2; text-align: left; }
