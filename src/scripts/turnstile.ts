@@ -21,7 +21,7 @@ function loadApi(): Promise<TurnstileApi> {
   });
   return loading;
 }
-export async function verifyTurnstile(sitekey: string, action: AiAction, signal: AbortSignal): Promise<string> {
+export async function verifyTurnstile(sitekey: string, action: AiAction | 'page', signal: AbortSignal): Promise<string> {
   if (!sitekey.trim()) throw new Error('AI demos are temporarily unavailable while human verification is configured.');
   if (signal.aborted) throw new Error('Request cancelled.');
   const api = await loadApi();

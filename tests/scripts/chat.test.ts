@@ -3,20 +3,21 @@ import { verifyTurnstile } from '../../src/scripts/turnstile';
 const signal = () => new AbortController().signal;
 const success = () => ({ ok: true, json: async () => ({ answer: '<script>plain text</script>' }) }) as Response;
 describe('protected AI requests', () => {
-  test('uses a fresh verification token and exact route; translation stays raw', async () => {
+  test('uses the page session and exact route; translation stays raw', async () => {
     const verify = jest.fn().mockResolvedValueOnce('first').mockResolvedValueOnce('second');
     const fetcher = jest.fn().mockResolvedValue(success());
     const request = createAiClient(verify, fetcher);
     await expect(request('translation', { question: 'Hello', language: 'French' }, signal())).resolves.toBe('<script>plain text</script>');
     await request('translation', { question: 'Again', language: 'French' }, signal());
-    expect(verify.mock.calls.map(call => call[0])).toEqual(['translation', 'translation']);
+    expect(verify).toHaveBeenCalledTimes(2);
+    expect(verify.mock.calls[0][0]).toBeInstanceOf(AbortSignal);
     expect(fetcher.mock.calls[0][0]).toBe('https://skippyts.doctorew.com/translation');
-    expect(JSON.parse(fetcher.mock.calls[0][1].body)).toEqual({ question: 'Hello', language: 'French', turnstileToken: 'first' });
-    expect(JSON.parse(fetcher.mock.calls[1][1].body).turnstileToken).toBe('second');
+    expect(JSON.parse(fetcher.mock.calls[0][1].body)).toEqual({ question: 'Hello', language: 'French', sessionToken: 'first' });
+    expect(JSON.parse(fetcher.mock.calls[1][1].body).sessionToken).toBe('second');
   });
   test('missing configuration fails closed without a network call', async () => {
     const fetcher = jest.fn();
-    const request = createAiClient((action, tokenSignal) => verifyTurnstile('', action, tokenSignal), fetcher);
+    const request = createAiClient(tokenSignal => verifyTurnstile('', 'page', tokenSignal), fetcher);
     await expect(request('chatbot', { question: 'Hi' }, signal())).rejects.toThrow('temporarily unavailable');
     expect(fetcher).not.toHaveBeenCalled();
   });
@@ -57,9 +58,9 @@ test('Turnstile uses explicit execution, route action and cleans up its widget',
     remove: jest.fn(),
   };
   (globalThis as unknown as { window: unknown }).window = { turnstile: api };
-  await expect(verifyTurnstile('configured-public-key', 'foxtrot', signal())).resolves.toBe('verified-token');
-  expect(api.render).toHaveBeenCalledWith('#turnstile-foxtrot', expect.objectContaining({ action: 'foxtrot', execution: 'execute', sitekey: 'configured-public-key', 'response-field': false }));
-  expect(api.execute).toHaveBeenCalledWith('#turnstile-foxtrot');
+  await expect(verifyTurnstile('configured-public-key', 'page', signal())).resolves.toBe('verified-token');
+  expect(api.render).toHaveBeenCalledWith('#turnstile-page', expect.objectContaining({ action: 'page', execution: 'execute', sitekey: 'configured-public-key', 'response-field': false }));
+  expect(api.execute).toHaveBeenCalledWith('#turnstile-page');
   expect(api.remove).toHaveBeenCalledWith('widget');
   delete (globalThis as unknown as { window?: unknown }).window;
 });

@@ -1,12 +1,12 @@
 export type AiAction = 'chatbot' | 'translation' | 'foxtrot';
 export type AiRequestPhase = 'verifying' | 'requesting';
-type Verify = (action: AiAction, signal: AbortSignal) => Promise<string>;
+type Session = (signal: AbortSignal) => Promise<string>;
 const routes: Record<AiAction, string> = {
   chatbot: 'https://skippyts.doctorew.com/chatbot',
   translation: 'https://skippyts.doctorew.com/translation',
   foxtrot: 'https://skippyts.doctorew.com/foxtrot',
 };
-export function createAiClient(verify: Verify, fetcher: typeof fetch = fetch, timeoutMs = 45000, onPhase: (action: AiAction, phase: AiRequestPhase) => void = () => {}) {
+export function createAiClient(session: Session, fetcher: typeof fetch = fetch, timeoutMs = 45000, onPhase: (action: AiAction, phase: AiRequestPhase) => void = () => {}, onUnauthorized: () => void = () => {}) {
   const pending = new Set<AiAction>();
   return async (action: AiAction, payload: Record<string, string>, signal: AbortSignal): Promise<string> => {
     if (pending.has(action)) throw new Error('This request is already in progress.');
@@ -21,15 +21,16 @@ export function createAiClient(verify: Verify, fetcher: typeof fetch = fetch, ti
     try {
       if (signal.aborted) throw new Error('Request cancelled.');
       onPhase(action, 'verifying');
-      const turnstileToken = await verify(action, controller.signal);
-      if (!turnstileToken || controller.signal.aborted) throw new Error('Human verification was not completed.');
+      const sessionToken = await session(controller.signal);
+      if (!sessionToken || controller.signal.aborted) throw new Error('Browser verification was not completed.');
       onPhase(action, 'requesting');
       timer = setTimeout(abort, timeoutMs);
       const response = await fetcher(routes[action], {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...payload, turnstileToken }), signal: controller.signal,
+        body: JSON.stringify({ ...payload, sessionToken }), signal: controller.signal,
       });
       if (!response.ok) {
+        if (response.status === 401) onUnauthorized();
         const fallback = response.status === 429 ? 'Demo limit reached. Please try again later.' : 'Request could not be completed. Please try again.';
         let message = fallback;
         try {
