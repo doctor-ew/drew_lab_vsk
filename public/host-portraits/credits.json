@@ -1,0 +1,52 @@
+[
+  {
+    "id": "stubing",
+    "file": "stubing.jpg",
+    "caption": "Gavin MacLeod, 1975 publicity portrait (as Murray Slaughter, not Captain Stubing)",
+    "author": "CBS Television",
+    "source": "https://commons.wikimedia.org/wiki/File:Gavin_McLeod_(headshot).jpg",
+    "license": "Public domain in the United States (published without copyright notice before 1978)",
+    "licenseUrl": "https://commons.wikimedia.org/wiki/Commons:Copyright_rules_by_territory/United_States#Works_first_published_in_the_United_States",
+    "changes": "No changes to the downloaded Commons file."
+  },
+  {
+    "id": "benson",
+    "file": "benson.jpg",
+    "caption": "Robert Guillaume as Benson, Soap publicity portrait, 1977",
+    "author": "ABC Television",
+    "source": "https://commons.wikimedia.org/wiki/File:Robert_Guillaume_SOAP_1977_(cropped).JPG",
+    "license": "Public domain in the United States (published without copyright notice before 1978)",
+    "licenseUrl": "https://commons.wikimedia.org/wiki/Commons:Copyright_rules_by_territory/United_States#Works_first_published_in_the_United_States",
+    "changes": "Commons crop by TDKR Chicago 101; no further changes."
+  },
+  {
+    "id": "arnold",
+    "file": "arnold.png",
+    "caption": "Gary Coleman, 2005 portrait (not an Arnold Jackson production still)",
+    "author": "schmeeve",
+    "source": "https://commons.wikimedia.org/wiki/File:GaryColeman.png",
+    "license": "Creative Commons Attribution-ShareAlike 2.0 Generic",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+    "changes": "No changes to the downloaded Commons file."
+  },
+  {
+    "id": "starbuck",
+    "file": "starbuck.jpg",
+    "caption": "Dirk Benedict, 2012 portrait (not a Starbuck production still)",
+    "author": "Yuls33",
+    "source": "https://commons.wikimedia.org/wiki/File:Dirk_Benedict_(1).jpg",
+    "license": "Creative Commons Attribution-ShareAlike 3.0 Unported",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+    "changes": "No changes to the downloaded Commons file."
+  },
+  {
+    "id": "mrt",
+    "file": "mrt.jpg",
+    "caption": "Mr. T in London, 2009",
+    "author": "Annie Mole",
+    "source": "https://commons.wikimedia.org/wiki/File:Mr_T_2009.jpg",
+    "license": "Creative Commons Attribution 2.0 Generic",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "changes": "No changes to the downloaded Commons file."
+  }
+]

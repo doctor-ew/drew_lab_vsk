@@ -4,6 +4,7 @@ export interface Personality {
   display_name: string;
   name: string;
   icon: string;
+  portrait?: { src: string; caption: string; credit: string } | null;
 }
 
 export const personalities: Personality[] = [
@@ -97,4 +98,11 @@ export const personalities: Personality[] = [
   { display_name: "Wong", name: "wong", icon: "wong.png" },
   { display_name: "Wrecker (Bad Batch)", name: "wrecker", icon: "wrecker.png" },
   { display_name: "Zorak", name: "zorak", icon: "zorak.png" },
+  { display_name: "Captain Stubing (The Love Boat)", name: "stubing", icon: "", portrait: { src: "/host-portraits/stubing.jpg", caption: "Gavin MacLeod, 1975 publicity portrait", credit: "/host-portraits/credits.html#stubing" } },
+  { display_name: "Arnold Jackson (Diff’rent Strokes)", name: "arnold", icon: "", portrait: { src: "/host-portraits/arnold.png", caption: "Gary Coleman, 2005 portrait", credit: "/host-portraits/credits.html#arnold" } },
+  { display_name: "Benson DuBois", name: "benson", icon: "", portrait: { src: "/host-portraits/benson.jpg", caption: "Robert Guillaume as Benson, 1977 publicity portrait", credit: "/host-portraits/credits.html#benson" } },
+  { display_name: "Jabberjaw", name: "jabberjaw", icon: "", portrait: null },
+  { display_name: "Mr. T", name: "mrt", icon: "", portrait: { src: "/host-portraits/mrt.jpg", caption: "Mr. T, 2009 portrait", credit: "/host-portraits/credits.html#mrt" } },
+  { display_name: "Twiki (Buck Rogers)", name: "twiki", icon: "", portrait: null },
+  { display_name: "Starbuck (Battlestar Galactica, 1978)", name: "starbuck", icon: "", portrait: { src: "/host-portraits/starbuck.jpg", caption: "Dirk Benedict, 2012 portrait", credit: "/host-portraits/credits.html#starbuck" } },
 ];

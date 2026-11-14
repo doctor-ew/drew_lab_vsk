@@ -117,7 +117,7 @@
 
     <section id="chat" class="items-center w-full m-0">
         <h1 id="skippistan" class="h1-skippy-chat mx-auto flex-auto p-10 m-0 bg-no-repeat bg-white pl-40 font-bold text-3xl">
-            Chat with {selectedPersonality.display_name}! <br><sub class="text-sm">using TypeScript, Lambda, Serverless, Sveltekit, LangChain, and OpenAI \\ <a href="https://github.com/doctor-ew/drew_lab_vsk" target="_blank" rel="noopener noreferrer" class="animate-pulse hover:animate-bounce">repo</a></sub>
+            Chat with {selectedPersonality.display_name}! <br><sub class="text-sm">using TypeScript, Lambda, Serverless, Sveltekit, LangChain, and OpenAI \\ <a href="https://github.com/doctor-ew/drew_lab_vsk" target="_blank" rel="noopener noreferrer" class="animate-pulse hover:animate-bounce">repo</a>{#if selectedPersonality.portrait} \ <a href={selectedPersonality.portrait.credit} target="_blank" rel="noopener noreferrer" title={selectedPersonality.portrait.caption}>portrait credit</a>{/if}</sub>
         </h1>
         <div class="form_holder block mb-6">
             <form class="mx-auto p-6" on:submit|preventDefault={handleRelayMessage}>

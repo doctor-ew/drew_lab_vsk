@@ -100,3 +100,20 @@ test('safe bounded backend messages remain visible; malformed messages use a fal
   const unavailable = jest.fn().mockResolvedValue({ok:false,status:429,json:async()=>{throw Error('HTML gateway response');}});
   await expect(createAiClient(async () => 'token', unavailable)('chatbot', {question:'Hi'}, signal())).rejects.toThrow('Demo limit reached.');
 });
+
+import { updateSkippyChatBackground } from '../../src/scripts/chat';
+import { personalities } from '../../src/scripts/personalities';
+
+test('character changes clear unavailable artwork and preserve legacy portrait URLs', () => {
+  const heading = {style: {backgroundImage:'', backgroundSize:'', backgroundRepeat:'', backgroundPosition:''}};
+  (globalThis as unknown as {document: unknown}).document = {querySelector: () => heading};
+  updateSkippyChatBackground({name:'murdock'});
+  expect(heading.style.backgroundImage).toContain('/gpt_personalities/murdock.png');
+  updateSkippyChatBackground(personalities.find(personality => personality.name === 'benson')!);
+  expect(heading.style.backgroundImage).toBe("url('/host-portraits/benson.jpg')");
+  updateSkippyChatBackground(personalities.find(personality => personality.name === 'twiki')!);
+  expect(heading.style.backgroundImage).toBe('none');
+  updateSkippyChatBackground({name:'doctordoom'});
+  expect(heading.style.backgroundImage).toContain('/gpt_personalities/doctordoom.png');
+  delete (globalThis as unknown as {document?:unknown}).document;
+});
