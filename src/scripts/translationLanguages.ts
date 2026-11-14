@@ -169,4 +169,7 @@ export const translationLanguages = [
   { code: "Trigedasleng", name: "Trigedasleng [100] - David J. Peterson" },
   { code: "Valarian", name: "Valarian [GoT] - George R.R. Martin" },
   { code: "Vulcan", name: "Vulcan [ST] - Star Trek" },
+  { code: "Dog", name: "Dog [Woofs, barks & growls]" },
+  { code: "Martian", name: "Martian [Playful alien speech]" },
+  { code: "Binary", name: "Robot / Binary [0s and 1s]" },
 ];
